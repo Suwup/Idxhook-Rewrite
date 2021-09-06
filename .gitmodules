@@ -1,0 +1,6 @@
+[submodule "Idxhook/vendor/imgui"]
+	path = Idxhook/vendor/imgui
+	url = https://github.com/Suwup/imgui
+[submodule "Idxhook/vendor/minhook"]
+	path = Idxhook/vendor/minhook
+	url = https://github.com/Suwup/minhook

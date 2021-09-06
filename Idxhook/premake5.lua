@@ -24,11 +24,16 @@ project "Idxhook"
 
 	includedirs
 	{
-        "src"
+        "src",
+		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.minhook}"
 	}
 
 	links
 	{	
+		"ImGui",
+		"minhook",
+		"d3d11"
 	}
 
 	filter "system:windows"
