@@ -1,6 +1,9 @@
 #include "ihpch.h"
 #include "ImGuiLayer.h"
 
+#include "Idxhook/Core/Cheat.h"
+#include "Idxhook/Engine/GameState.h"
+
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace Idxhook {
@@ -46,12 +49,20 @@ namespace Idxhook {
 				{
 					if (!s_Instance->m_MenuOpen) break;
 
+					float& fov = Cheat::FieldOfView();
+
 					ImGui::SetNextWindowSize({ 500.0f, 350.0f });
 					ImGui::Begin("Idxhook");
 					ImGui::BeginTabBar("TabBar", ImGuiTabBarFlags_NoTabListScrollingButtons);
 					{
 						if (ImGui::BeginTabItem("sussy baka"))
 						{
+							if (ImGui::SliderFloat("Field Of View", &fov, 20.0f, 180.0f, "%.2f"))
+							{
+								if (GameState::Pointers::CheckPointers())
+									UnityEngine::Camera::GetMain()->SetFieldOfView(fov);
+							}
+
 							ImGui::EndTabItem();
 						}
 					}

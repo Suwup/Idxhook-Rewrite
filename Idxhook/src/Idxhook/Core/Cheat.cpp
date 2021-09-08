@@ -4,7 +4,6 @@
 #include "Idxhook/DirectX/DirectX11.h"
 #include "Idxhook/ImGui/ImGuiLayer.h"
 
-#include "Idxhook/Engine/Hooks.h"
 #include "Idxhook/Engine/GameState.h"
 #include "Idxhook/Engine/Offsets.h"
 
@@ -13,9 +12,9 @@
 
 namespace Idxhook {
 
-#define LOG_STATUS(msg, status) std::cout << msg " -> " << MH_StatusToString(status) << std::endl
+#define LOG_STATUS(msg, status) std::cout << msg " -> " << MH_StatusToString(status) << "\n"
 #define BIND_FN_IMPL(msg, target, detour, original) LOG_STATUS(msg, MH_CreateHook(target, detour, original))
-#define BIND_FN(loc, fn) BIND_FN_IMPL(#loc"::"#fn, Offsets::Hooks::loc::fn, reinterpret_cast<void*>(&loc::fn), reinterpret_cast<void**>(&Hooks::loc::Original::fn))
+#define BIND_FN(loc, fn) BIND_FN_IMPL(#loc"::"#fn, Offsets::Hooks::loc::fn, reinterpret_cast<void*>(&Hooks::loc::fn), reinterpret_cast<void**>(&Original::loc::fn))
 
 	Cheat* Cheat::s_Instance = nullptr;
 
@@ -60,76 +59,78 @@ namespace Idxhook {
 	{
 	}
 
-	void Cheat::DNAEvidence::Start(void* This, void* Info)
+	void Cheat::Hooks::DNAEvidence::Start(void* This, void* Info)
 	{
-		Hooks::DNAEvidence::Original::Start(This, Info);
+		Original::DNAEvidence::Start(This, Info);
 
-		if (Utilities::IsValid(This))
+		if (Utils::IsValid(This))
 			GameState::Pointers::DNAEvidence = This;
 	}
 
-	void Cheat::GhostAI::Start(void* This, void* Info)
+	void Cheat::Hooks::GhostAI::Start(void* This, void* Info)
 	{
-		Hooks::GhostAI::Original::Start(This, Info);
+		Original::GhostAI::Start(This, Info);
 
-		if (Utilities::IsValid(This))
+		if (Utils::IsValid(This))
 			GameState::Pointers::GhostAI = This;
 	}
 
-	void Cheat::LevelController::Start(void* This, void* Info)
+	void Cheat::Hooks::LevelController::Start(void* This, void* Info)
 	{
-		Hooks::LevelController::Original::Start(This, Info);
+		Original::LevelController::Start(This, Info);
 
-		if (Utilities::IsValid(This))
+		if (Utils::IsValid(This))
 			GameState::Pointers::LevelController = This;
 	}
 
-	void Cheat::GameController::Exit(void* This, void* Info)
+	void Cheat::Hooks::GameController::Exit(void* This, void* Info)
 	{
 		GameState::Pointers::ResetPointers();
-		Hooks::GameController::Original::Exit(This, Info);
+		Original::GameController::Exit(This, Info);
 	}
 
-	void Cheat::PauseMenuController::Leave(void* This, void* Info)
+	void Cheat::Hooks::PauseMenuController::Leave(void* This, void* Info)
 	{
 		GameState::Pointers::ResetPointers();
-		Hooks::PauseMenuController::Original::Leave(This, Info);
+		Original::PauseMenuController::Leave(This, Info);
 	}
 
-	void Cheat::RewardManager::Awake(void* This, void* Info)
+	void Cheat::Hooks::RewardManager::Awake(void* This, void* Info)
 	{
 		GameState::Pointers::ResetPointers();
-		Hooks::RewardManager::Original::Awake(This, Info);
+		Original::RewardManager::Awake(This, Info);
 	}
 
-	void Cheat::SceneManager::LoadScene(System::String* This, void* Info)
+	void Cheat::Hooks::SceneManager::LoadScene(System::String* Name, void* Info)
 	{
 		GameState::Pointers::ResetPointers();
-		Hooks::SceneManager::Original::LoadScene(This, Info);
+		Original::SceneManager::LoadScene(Name, Info);
 	}
 
-	void Cheat::SceneManager::SceneLoaded(UnityEngine::Scene Scene, int Mode, void* Info)
+	void Cheat::Hooks::SceneManager::SceneLoaded(UnityEngine::Scene Scene, int Mode, void* Info)
 	{
-		Hooks::SceneManager::Original::SceneLoaded(Scene, Mode, Info);
-#if 0
-		static const char* Scenes[] = { "", "In Menu", "Tanglewood Street House", "Asylum", "Edgefield Street House",
-								 "Ridgeview Road House", "Brownstone High School", "Bleasdale Farmhouse", "Grafton Farmhouse",
-								 "Prison", "Willow Street House" };
+		Original::SceneManager::SceneLoaded(Scene, Mode, Info);
 
-		RichPresence::SetState(Scenes[Scene.GetBuildIndexInternal()]);
-#endif
+		static const char* scenes[] =
+		{
+			"", "In Menu", "Tanglewood Street House", "Asylum", "Edgefield Street House",
+			"Ridgeview Road House", "Brownstone High School", "Bleasdale Farmhouse",
+			"Grafton Farmhouse", "Prison", "Willow Street House"
+		};
+
+		std::cout << "Loaded Scene: " << scenes[Scene.GetBuildIndexInternal()] << "\n";
 	}
 
-	void Cheat::FuseBox::Use(void* This, void* Info)
+	void Cheat::Hooks::FuseBox::Use(void* This, void* Info)
 	{
-		//if (Menu::State::BlockFuseBox) return;
-		Hooks::FuseBox::Original::Use(This, Info);
+		if (!BlockFuseBox())
+			Original::FuseBox::Use(This, Info);
 	}
 
-	void Cheat::FuseBox::TurnOff(void* This, bool Unknown, void* Info)
+	void Cheat::Hooks::FuseBox::TurnOff(void* This, bool Unknown, void* Info)
 	{
-		//if (Menu::State::BlockFuseBox) return;
-		Hooks::FuseBox::Original::TurnOff(This, Unknown, Info);
+		if (!BlockFuseBox())
+			Original::FuseBox::TurnOff(This, Unknown, Info);
 	}
 
 	static std::array<std::pair<UnityEngine::HumanBodyBones, UnityEngine::HumanBodyBones>, 16> Bones = { {
@@ -151,13 +152,15 @@ namespace Idxhook {
 		{ UnityEngine::HumanBodyBones::RightLowerArm, UnityEngine::HumanBodyBones::RightHand }
 	} };
 
-	void Cheat::GUIUtility::CheckOnGUI(void* Info)
+	void Cheat::Hooks::GUIUtility::CheckOnGUI(void* Info)
 	{
-		Hooks::GUIUtility::Original::CheckOnGUI(Info);
-#if 0
-		UnityEngine::Camera* MainCamera = UnityEngine::Camera::GetMain();
-		//MainCamera->SetFieldOfView((float)Menu::State::FieldOfView);
+		Original::GUIUtility::CheckOnGUI(Info);
 
+		UnityEngine::Camera* cam = UnityEngine::Camera::GetMain();
+
+		float& fov = FieldOfView();
+		fov = cam->GetFieldOfView();
+#if 0
 		if (!GameState::Pointers::CheckPointers()) return;
 
 		UnityEngine::Vector3 MainCameraPosition = MainCamera->GetTransform()->GetPosition();
@@ -428,16 +431,16 @@ namespace Idxhook {
 #endif
 	}
 
-	void Cheat::Player::Update(Game::Player* Player, void* Info)
+	void Cheat::Hooks::Player::Update(Engine::Player* Player, void* Info)
 	{
-		Hooks::Player::Original::Update(Player, Info);
+		Original::Player::Update(Player, Info);
 
 		if (!GameState::Pointers::CheckPointers()) return;
 
-		Game::GameController* CurrentGameController = (Utilities::GetTypeFromTypeInfo<Game::GameController>(Offsets::TypeInfo::GameController));
+		Engine::GameController* gameController = Utils::GetTypeFromTypeInfo<Engine::GameController>(Offsets::TypeInfo::GameController);
 
 		{
-			Game::Player* localPlayer = CurrentGameController->LocalPlayer->RealPlayer;
+			Engine::Player* localPlayer = gameController->MyPlayer->RealPlayer;
 
 			if (localPlayer == Player)
 			{

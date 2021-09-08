@@ -1,7 +1,7 @@
 #pragma once
 #include "UnityEngine.h"
 
-namespace Idxhook::Game {
+namespace Idxhook::Engine {
 
 	struct Evidence : public UnityEngine::Component
 	{
@@ -55,9 +55,25 @@ namespace Idxhook::Game {
         };
     };
 
+	namespace Photon::Pun {
+
+		enum class RpcTarget : int
+		{
+			value__,
+			All = 0,
+			Others = 1,
+			MasterClient = 2,
+			AllBuffered = 3,
+			OthersBuffered = 4,
+			AllViaServer = 5,
+			AllBufferedViaServer = 6
+		};
+
+	}
+
 	struct PhotonView
 	{
-        void RPC(System::String* Method, std::int32_t Target, void* Arguments) { return MemoryHelper::CallFunction<void, void*, System::String*, std::int32_t , void*>(Offsets::Methods::PhotonView::RPC, this, Method, Target, Arguments); }
+        void RPC(System::String* MethodName, Photon::Pun::RpcTarget Target, void* Arguments) { return Memory::CallFunction<void, void*, System::String*, Photon::Pun::RpcTarget, void*>(Offsets::Methods::PhotonView::RPC, this, MethodName, Target, Arguments); }
     };
 
 	struct PlayerStamina
@@ -111,7 +127,7 @@ namespace Idxhook::Game {
 	{
         union
 		{
-            Member(PlayerData*, LocalPlayer, 0x18);
+            Member(PlayerData*, MyPlayer, 0x18);
             Member(System::List<PlayerData>*, PlayerList, 0x58);
         };
     };
@@ -146,8 +162,8 @@ namespace Idxhook::Game {
 
 	struct GhostActivity
 	{
-        void Interact() { return MemoryHelper::CallFunction<void, void*>(Offsets::Methods::GhostActivity::Interact, this); }
-        void InteractWithARandomDoor() { return MemoryHelper::CallFunction<void, void*>(Offsets::Methods::GhostActivity::InteractWithARandomDoor, this); }
+        void Interact() { return Memory::CallFunction<void, void*>(Offsets::Methods::GhostActivity::Interact, this); }
+        void InteractWithARandomDoor() { return Memory::CallFunction<void, void*>(Offsets::Methods::GhostActivity::InteractWithARandomDoor, this); }
     };
 
 	struct GhostAI : public UnityEngine::Component
@@ -160,8 +176,8 @@ namespace Idxhook::Game {
             Member(bool, IsHunting, 0xA8);
         };
 
-        void Appear() { return MemoryHelper::CallFunction<void, void*, bool>(Offsets::Methods::GhostAI::Appear, this, true); }
-        void RandomEvent() { return MemoryHelper::CallFunction<void, void*>(Offsets::Methods::GhostAI::RandomEvent, this); }
+        void Appear() { return Memory::CallFunction<void, void*, bool>(Offsets::Methods::GhostAI::Appear, this, true); }
+        void RandomEvent() { return Memory::CallFunction<void, void*>(Offsets::Methods::GhostAI::RandomEvent, this); }
     };
 
 	struct FuseBox : public UnityEngine::Component
@@ -217,7 +233,7 @@ namespace Idxhook::Game {
             Member(UnityEngine::Text*, Label, 0x30);
         };
 
-        void Completed() { return MemoryHelper::CallFunction<void, void*>(Offsets::Methods::Mission::Completed, this); }
+        void Completed() { return Memory::CallFunction<void, void*>(Offsets::Methods::Mission::Completed, this); }
     };
 
 	struct MissionManager
