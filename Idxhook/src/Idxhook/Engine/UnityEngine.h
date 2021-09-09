@@ -18,7 +18,9 @@ namespace Idxhook::UnityEngine {
     public:
         float X, Y, Z;
 
-        static float Distance(Vector3 First, Vector3 Second) { return Memory::CallFunction<float, Vector3, Vector3>(Offsets::Methods::Vector3::Distance, First, Second); }
+        static float Distance(Vector3 A, Vector3 B) { return Memory::CallFunction<float, Vector3, Vector3>(Offsets::Methods::Vector3::Distance, A, B); }
+        static Vector3 Addition(Vector3 A, Vector3 B) { return Memory::CallFunction<Vector3, Vector3, Vector3>(Offsets::Methods::Vector3::Addition, A, B); }
+		Vector3 operator+(const Vector3& other) const { return Addition(*this, other); }
     };
 
     class Vector2

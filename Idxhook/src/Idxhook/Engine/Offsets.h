@@ -2,96 +2,99 @@
 
 namespace Idxhook::Offsets {
 
+#define OFFSET(name, offset) inline std::uintptr_t name = Memory::GetRVA(offset)
+#define OFFSET_PTR(name, offset) inline void* name = Memory::GetRVAPointer<void>(offset)
+
     namespace Methods {
 
         namespace Screen {
 
-            inline std::uintptr_t GetWidth = Memory::GetRVA(0xAE2FB0);
-            inline std::uintptr_t GetHeight = Memory::GetRVA(0xAE2F50);
+			OFFSET(GetWidth, 11903344); /* int32_t UnityEngine_Screen__get_width (const MethodInfo* method); */
+			OFFSET(GetHeight, 11903248); /* int32_t UnityEngine_Screen__get_height (const MethodInfo* method); */
 
         }
 
         namespace Camera {
 
-            inline std::uintptr_t GetMain = Memory::GetRVA(0xAAA120);
-            inline std::uintptr_t GetFieldOfView = Memory::GetRVA(11182240); /* float UnityEngine_Camera__get_fieldOfView (UnityEngine_Camera_o* __this, const MethodInfo* method); */
-            inline std::uintptr_t SetFieldOfView = Memory::GetRVA(11185504); /* void UnityEngine_Camera__set_fieldOfView (UnityEngine_Camera_o* __this, float value, const MethodInfo* method); */
-            inline std::uintptr_t WorldToScreenPoint /* WorldToScreenPoint_1 */ = Memory::GetRVA(0xAA9A20);
+            OFFSET(GetMain, 11527120); /* UnityEngine_Camera_o* UnityEngine_Camera__get_main (const MethodInfo* method); */
+            OFFSET(GetFieldOfView, 11526992); /* float UnityEngine_Camera__get_fieldOfView (UnityEngine_Camera_o* __this, const MethodInfo* method); */
+            OFFSET(SetFieldOfView, 11530256); /* void UnityEngine_Camera__set_fieldOfView (UnityEngine_Camera_o* __this, float value, const MethodInfo* method); */
+            OFFSET(WorldToScreenPoint, 11525328); /* UnityEngine_Vector3_o UnityEngine_Camera__WorldToScreenPoint (UnityEngine_Camera_o* __this, UnityEngine_Vector3_o position, const MethodInfo* method); */
 
         }
 
-        namespace Component /* Component_1 */ { inline std::uintptr_t GetTransform = Memory::GetRVA(0xAACF30); }
+        namespace Component { inline std::uintptr_t GetTransform = Memory::GetRVA(11538912); } /* UnityEngine_Transform_o* UnityEngine_Component__get_transform (UnityEngine_Component_o* __this, const MethodInfo* method); */
 
         namespace Transform {
 
-			inline std::uintptr_t GetPosition = Memory::GetRVA(0xAEE6F0);
-			inline std::uintptr_t SetPosition = Memory::GetRVA(0xAEF030);
-			inline std::uintptr_t TransformDirection = Memory::GetRVA(0xAEDB40);
+			OFFSET(GetPosition, 11950256); /* UnityEngine_Vector3_o UnityEngine_Transform__get_position (UnityEngine_Transform_o* __this, const MethodInfo* method); */
+			OFFSET(SetPosition, 11952624); /* void UnityEngine_Transform__set_position (UnityEngine_Transform_o* __this, UnityEngine_Vector3_o value, const MethodInfo* method); */
+			OFFSET(TransformDirection, 11947264); /* UnityEngine_Vector3_o UnityEngine_Transform__TransformDirection (UnityEngine_Transform_o* __this, UnityEngine_Vector3_o direction, const MethodInfo* method); */
 
         }
 
         namespace Vector3 {
 
-			inline std::uintptr_t Distance = Memory::GetRVA(0xE46A10);
-			inline std::uintptr_t Addition = Memory::GetRVA(0xE48F00);
+			OFFSET(Distance, 17021136); /* float UnityEngine_Vector3__Distance (UnityEngine_Vector3_o a, UnityEngine_Vector3_o b, const MethodInfo* method); */
+			OFFSET(Addition, 17030592); /* UnityEngine_Vector3_o UnityEngine_Vector3__op_Addition (UnityEngine_Vector3_o a, UnityEngine_Vector3_o b, const MethodInfo* method); */
 
         }
 
-		namespace Text { inline std::uintptr_t GetText = Memory::GetRVA(0x2EDEB0); }
-		namespace Scene { inline std::uintptr_t GetBuildIndexInternal = Memory::GetRVA(0xAE27B0); }
-		namespace Animator { inline std::uintptr_t GetBoneTransform = Memory::GetRVA(0xEA1680); }
-		namespace Rigidbody { inline std::uintptr_t SetMass = Memory::GetRVA(0xE94670); }
-		namespace PhotonNetwork { inline std::uintptr_t SetNickName = Memory::GetRVA(0x6270E0); }
-		namespace PhotonView { inline std::uintptr_t RPC = Memory::GetRVA(0x2B42EA0); }
-		namespace Marshal { inline std::uintptr_t PtrToStringAnsi = Memory::GetRVA(0x4D3FC0); }
-		namespace Mission { inline std::uintptr_t Completed = Memory::GetRVA(0x29E3800); }
+		namespace Text { OFFSET(GetText, 3075760); } /* System_String_o* UnityEngine_UI_Text__get_text (UnityEngine_UI_Text_o* __this, const MethodInfo* method); */
+		namespace Scene { OFFSET(GetBuildIndexInternal, 11901296); } /* int32_t UnityEngine_SceneManagement_Scene__GetBuildIndexInternal (int32_t sceneHandle, const MethodInfo* method); */
+		namespace Animator { OFFSET(GetBoneTransform, 17392960); } /* UnityEngine_Transform_o* UnityEngine_Animator__GetBoneTransform (UnityEngine_Animator_o* __this, int32_t humanBoneId, const MethodInfo* method); */
+		namespace Rigidbody { OFFSET(SetMass, 17339696); } /* void UnityEngine_Rigidbody__set_mass (UnityEngine_Rigidbody_o* __this, float value, const MethodInfo* method); */
+		namespace PhotonNetwork { OFFSET(SetNickName, 6643744); } /* void Photon_Pun_PhotonNetwork__set_NickName (System_String_o* value, const MethodInfo* method); */
+		namespace PhotonView { OFFSET(RPC, 44853488); } /* void Photon_Pun_PhotonView__RPC (Photon_Pun_PhotonView_o* __this, System_String_o* methodName, int32_t target, System_Object_array* parameters, const MethodInfo* method); */
+		namespace Marshal { OFFSET(PtrToStringAnsi, 5254912); } /* System_String_o* System_Runtime_InteropServices_Marshal__PtrToStringAnsi (intptr_t ptr, const MethodInfo* method); */
+		namespace Mission { OFFSET(Completed, 33125376); } /* void Mission__Completed (Mission_o* __this, const MethodInfo* method); */
 
         namespace GhostAI {
 
-			inline std::uintptr_t Appear = Memory::GetRVA(0xFF9640);
-			inline std::uintptr_t RandomEvent = Memory::GetRVA(0xFFA7C0);
+			OFFSET(Appear, 18764416); /* void GhostAI__Appear (GhostAI_o* __this, bool ___________, const MethodInfo* method); */
+			OFFSET(RandomEvent, 18768960); /* void GhostAI__RandomEvent (GhostAI_o* __this, const MethodInfo* method); */
 
         }
 
         namespace GhostActivity {
 
-			inline std::uintptr_t Interact = Memory::GetRVA(0xFFF770);
-			inline std::uintptr_t InteractWithARandomDoor = Memory::GetRVA(0xFFEC80);
+			OFFSET(Interact, 18788944); /* void GhostActivity__Interact (GhostActivity_o* __this, const MethodInfo* method); */
+			OFFSET(InteractWithARandomDoor, 18786448); /* bool GhostActivity__InteractWithARandomDoor (GhostActivity_o* __this, const MethodInfo* method); */
 
         }
     }
 
     namespace TypeInfo {
 
-		inline std::uintptr_t GameController = Memory::GetRVA(57117384);
-		inline std::uintptr_t EvidenceController = Memory::GetRVA(57116832);
-		inline std::uintptr_t MissionManager = Memory::GetRVA(57114872);
-		inline std::uintptr_t GhostController = Memory::GetRVA(57112376);
+		OFFSET(GameController, 56280704); /* GameController_c* */
+		OFFSET(EvidenceController, 56280160); /* EvidenceController_c* */
+		OFFSET(MissionManager, 56278200); /* MissionManager_c* */
+		OFFSET(GhostController, 56275672); /* GhostController_c* */
 
     }
 
     namespace Hooks {
 
-        namespace GUIUtility { inline void* CheckOnGUI = Memory::GetRVAPointer<void>(15090720); } /* void UnityEngine_GUIUtility__CheckOnGUI (const MethodInfo* method); */
-        namespace GhostAI { inline void* Start = Memory::GetRVAPointer<void>(16756464); } /* void GhostAI__Start (GhostAI_o* __this, const MethodInfo* method); */
-        namespace DNAEvidence { inline void* Start = Memory::GetRVAPointer<void>(33694544); } /* void DNAEvidence__Start (DNAEvidence_o* __this, const MethodInfo* method); */
-        namespace LevelController { inline void* Start = Memory::GetRVAPointer<void>(19850928); } /* void LevelController__Start (LevelController_o* __this, const MethodInfo* method); */
-        namespace GameController { inline void* Exit = Memory::GetRVAPointer<void>(16680496); } /* void GameController__Exit (GameController_o* __this, const MethodInfo* method); */
-        namespace PauseMenuController { inline void* Leave = Memory::GetRVAPointer<void>(24596128); } /* void PauseMenuController__Leave (PauseMenuController_o* __this, const MethodInfo* method); */
-        namespace RewardManager { inline void* Awake = Memory::GetRVAPointer<void>(29297376); } /* void RewardManager__Awake (RewardManager_o* __this, const MethodInfo* method); */
-        namespace Player { inline void* Update = Memory::GetRVAPointer<void>(23864624); } /* void Player__Update (Player_o* __this, const MethodInfo* method); */
+        namespace GUIUtility { OFFSET_PTR(CheckOnGUI, 17142496); } /* void UnityEngine_GUIUtility__CheckOnGUI (const MethodInfo* method); */
+        namespace GhostAI { OFFSET_PTR(Start, 18770800); } /* void GhostAI__Start (GhostAI_o* __this, const MethodInfo* method); */
+        namespace DNAEvidence { OFFSET_PTR(Start, 34393632); } /* void DNAEvidence__Start (DNAEvidence_o* __this, const MethodInfo* method); */
+        namespace LevelController { OFFSET_PTR(Start, 21922464); } /* void LevelController__Start (LevelController_o* __this, const MethodInfo* method); */
+        namespace GameController { OFFSET_PTR(Exit, 18694768); } /* void GameController__Exit (GameController_o* __this, const MethodInfo* method); */
+        namespace PauseMenuController { OFFSET_PTR(Leave, 25872032); } /* void PauseMenuController__Leave (PauseMenuController_o* __this, const MethodInfo* method); */
+        namespace RewardManager { OFFSET_PTR(Awake, 30304528); } /* void RewardManager__Awake (RewardManager_o* __this, const MethodInfo* method); */
+        namespace Player { OFFSET_PTR(Update, 24723248); } /* void Player__Update (Player_o* __this, const MethodInfo* method); */
 
         namespace SceneManager {
 
-            inline void* LoadScene = Memory::GetRVAPointer<void>(11412016); /* void UnityEngine_SceneManagement_SceneManager__LoadScene (System_String_o* sceneName, const MethodInfo* method); */
-            inline void* SceneLoaded = Memory::GetRVAPointer<void>(11410112); /* void UnityEngine_SceneManagement_SceneManager__Internal_SceneLoaded (UnityEngine_SceneManagement_Scene_o scene, int32_t mode, const MethodInfo* method); */
+            OFFSET_PTR(LoadScene, 11899888); /* void UnityEngine_SceneManagement_SceneManager__LoadScene (System_String_o* sceneName, const MethodInfo* method); */
+            OFFSET_PTR(SceneLoaded, 11897984); /* void UnityEngine_SceneManagement_SceneManager__Internal_SceneLoaded (UnityEngine_SceneManagement_Scene_o scene, int32_t mode, const MethodInfo* method); */
 
         }
 
         namespace FuseBox {
 
-            inline void* Use = Memory::GetRVAPointer<void>(32331200); /* void FuseBox__Use (FuseBox_o* __this, const MethodInfo* method); */
-            inline void* TurnOff = Memory::GetRVAPointer<void>(32296176); /* void FuseBox__TurnOff (FuseBox_o* __this, bool ___________, const MethodInfo* method); */
+            OFFSET_PTR(Use, 33713248); /* void FuseBox__Use (FuseBox_o* __this, const MethodInfo* method); */
+            OFFSET_PTR(TurnOff, 33678224); /* void FuseBox__TurnOff (FuseBox_o* __this, bool ___________, const MethodInfo* method); */
 
         }
 
