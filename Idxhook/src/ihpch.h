@@ -6,3 +6,5 @@
 #include <string_view>
 
 #include <windows.h>
+
+#include "Idxhook/Engine/Il2cpp.h"

@@ -36,7 +36,7 @@ namespace Idxhook::System {
         };
     };
 
-    namespace Utilities {
+    namespace Utils {
 
         auto GetStringNative = [](System::String* String) -> std::string
 		{

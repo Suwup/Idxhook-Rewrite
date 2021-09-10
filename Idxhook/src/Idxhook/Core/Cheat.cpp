@@ -59,7 +59,7 @@ namespace Idxhook {
 	{
 	}
 
-	void Cheat::Hooks::DNAEvidence::Start(void* This, void* Info)
+	void Cheat::Hooks::DNAEvidence::Start(void* This, MethodInfo* Info)
 	{
 		Original::DNAEvidence::Start(This, Info);
 
@@ -67,7 +67,7 @@ namespace Idxhook {
 			GameState::Pointers::DNAEvidence = This;
 	}
 
-	void Cheat::Hooks::GhostAI::Start(void* This, void* Info)
+	void Cheat::Hooks::GhostAI::Start(void* This, MethodInfo* Info)
 	{
 		Original::GhostAI::Start(This, Info);
 
@@ -75,7 +75,7 @@ namespace Idxhook {
 			GameState::Pointers::GhostAI = This;
 	}
 
-	void Cheat::Hooks::LevelController::Start(void* This, void* Info)
+	void Cheat::Hooks::LevelController::Start(void* This, MethodInfo* Info)
 	{
 		Original::LevelController::Start(This, Info);
 
@@ -83,31 +83,31 @@ namespace Idxhook {
 			GameState::Pointers::LevelController = This;
 	}
 
-	void Cheat::Hooks::GameController::Exit(void* This, void* Info)
+	void Cheat::Hooks::GameController::Exit(void* This, MethodInfo* Info)
 	{
 		GameState::Pointers::ResetPointers();
 		Original::GameController::Exit(This, Info);
 	}
 
-	void Cheat::Hooks::PauseMenuController::Leave(void* This, void* Info)
+	void Cheat::Hooks::PauseMenuController::Leave(void* This, MethodInfo* Info)
 	{
 		GameState::Pointers::ResetPointers();
 		Original::PauseMenuController::Leave(This, Info);
 	}
 
-	void Cheat::Hooks::RewardManager::Awake(void* This, void* Info)
+	void Cheat::Hooks::RewardManager::Awake(void* This, MethodInfo* Info)
 	{
 		GameState::Pointers::ResetPointers();
 		Original::RewardManager::Awake(This, Info);
 	}
 
-	void Cheat::Hooks::SceneManager::LoadScene(System::String* Name, void* Info)
+	void Cheat::Hooks::SceneManager::LoadScene(System::String* Name, MethodInfo* Info)
 	{
 		GameState::Pointers::ResetPointers();
 		Original::SceneManager::LoadScene(Name, Info);
 	}
 
-	void Cheat::Hooks::SceneManager::SceneLoaded(UnityEngine::Scene Scene, int Mode, void* Info)
+	void Cheat::Hooks::SceneManager::SceneLoaded(UnityEngine::Scene Scene, int Mode, MethodInfo* Info)
 	{
 		Original::SceneManager::SceneLoaded(Scene, Mode, Info);
 
@@ -121,62 +121,45 @@ namespace Idxhook {
 		std::cout << "Loaded Scene: " << scenes[Scene.GetBuildIndexInternal()] << "\n";
 	}
 
-	void Cheat::Hooks::FuseBox::Use(void* This, void* Info)
+	void Cheat::Hooks::FuseBox::Use(void* This, MethodInfo* Info)
 	{
 		if (!BlockFuseBox())
 			Original::FuseBox::Use(This, Info);
 	}
 
-	void Cheat::Hooks::FuseBox::TurnOff(void* This, bool Unknown, void* Info)
+	void Cheat::Hooks::FuseBox::TurnOff(void* This, bool Unknown, MethodInfo* Info)
 	{
 		if (!BlockFuseBox())
 			Original::FuseBox::TurnOff(This, Unknown, Info);
 	}
 
-	static std::array<std::pair<UnityEngine::HumanBodyBones, UnityEngine::HumanBodyBones>, 16> Bones = { {
-		{ UnityEngine::HumanBodyBones::Head, UnityEngine::HumanBodyBones::UpperChest },
-		{ UnityEngine::HumanBodyBones::UpperChest, UnityEngine::HumanBodyBones::Hips  },
-		{ UnityEngine::HumanBodyBones::Hips, UnityEngine::HumanBodyBones::LeftUpperLeg },
-		{ UnityEngine::HumanBodyBones::Hips, UnityEngine::HumanBodyBones::RightUpperLeg },
-		{ UnityEngine::HumanBodyBones::LeftUpperLeg, UnityEngine::HumanBodyBones::LeftLowerLeg },
-		{ UnityEngine::HumanBodyBones::RightUpperLeg, UnityEngine::HumanBodyBones::RightLowerLeg },
-		{ UnityEngine::HumanBodyBones::LeftLowerLeg, UnityEngine::HumanBodyBones::LeftFoot },
-		{ UnityEngine::HumanBodyBones::RightLowerLeg, UnityEngine::HumanBodyBones::RightFoot },
-		{ UnityEngine::HumanBodyBones::UpperChest, UnityEngine::HumanBodyBones::LeftShoulder },
-		{ UnityEngine::HumanBodyBones::UpperChest, UnityEngine::HumanBodyBones::RightShoulder },
-		{ UnityEngine::HumanBodyBones::LeftShoulder, UnityEngine::HumanBodyBones::LeftUpperArm },
-		{ UnityEngine::HumanBodyBones::RightShoulder, UnityEngine::HumanBodyBones::RightUpperArm },
-		{ UnityEngine::HumanBodyBones::LeftUpperArm, UnityEngine::HumanBodyBones::LeftLowerArm },
-		{ UnityEngine::HumanBodyBones::RightUpperArm, UnityEngine::HumanBodyBones::RightLowerArm },
-		{ UnityEngine::HumanBodyBones::LeftLowerArm, UnityEngine::HumanBodyBones::LeftHand },
-		{ UnityEngine::HumanBodyBones::RightLowerArm, UnityEngine::HumanBodyBones::RightHand }
-	} };
-
-	void Cheat::Hooks::GUIUtility::CheckOnGUI(void* Info)
+	void Cheat::Hooks::GUIUtility::CheckOnGUI(MethodInfo* Info)
 	{
 		Original::GUIUtility::CheckOnGUI(Info);
 
 		UnityEngine::Camera* cam = UnityEngine::Camera::GetMain();
 
-		float& fov = FieldOfView();
-		fov = cam->GetFieldOfView();
-#if 0
+		FieldOfView() = cam->GetFieldOfView();
 		if (!GameState::Pointers::CheckPointers()) return;
 
-		UnityEngine::Vector3 MainCameraPosition = MainCamera->GetTransform()->GetPosition();
-		UnityEngine::Vector2 ScreenSizeVector = { (float)UnityEngine::Screen::GetWidth(), (float)UnityEngine::Screen::GetHeight() };
+		//UnityEngine::Vector3 camLoc = cam->GetTransform()->GetPosition();
+		auto& screenSize = ScreenSize();
+		screenSize = { (float)UnityEngine::Screen::GetWidth(), (float)UnityEngine::Screen::GetHeight() };
 
-		static auto WorldToScreen = [](UnityEngine::Camera* Camera, UnityEngine::Vector3 Position, UnityEngine::Vector2& Output, UnityEngine::Vector2 ScreenSize) -> bool {
-			UnityEngine::Vector3 Point = Camera->WorldToScreenPoint(Position);
+		static auto ProjectWorldToScreen = [](UnityEngine::Camera* cam, const UnityEngine::Vector3& loc, UnityEngine::Vector2& screen, UnityEngine::Vector2 size) -> bool
+		{
+			UnityEngine::Vector3 Point = cam->WorldToScreenPoint(loc);
 
-			if (Point.Z < 0.f) return false;
+			if (Point.Z < 0.f)
+				return false;
 
-			UnityEngine::Vector2 ScreenPosition = { Point.X, ScreenSize.Y - Point.Y };
+			UnityEngine::Vector2 screenLoc{ Point.X, size.Y - Point.Y };
 
-			if (ScreenPosition.X > 0.f && ScreenPosition.Y > 0.f) {
-				if (ScreenPosition.X < ScreenSize.X && ScreenPosition.Y < ScreenSize.Y) {
-					Output.X = ScreenPosition.X;
-					Output.Y = ScreenPosition.Y;
+			if (screenLoc.X > 0.f && screenLoc.Y > 0.f) {
+				if (screenLoc.X < size.X && screenLoc.Y < size.Y)
+				{
+					screen.X = screenLoc.X;
+					screen.Y = screenLoc.Y;
 
 					return true;
 				}
@@ -185,11 +168,12 @@ namespace Idxhook {
 			return false;
 		};
 
-		Game::LevelController* CurrentLevelController = ((Game::LevelController*)GameState::Pointers::LevelController);
-		Game::GameController* CurrentGameController = (Utilities::GetTypeFromTypeInfo<Game::GameController>(Offsets::TypeInfo::GameController));
-		Game::EvidenceController* CurrentEvidenceController = (Utilities::GetTypeFromTypeInfo<Game::EvidenceController>(Offsets::TypeInfo::EvidenceController));
-		Game::MissionManager* CurrentMissionManager = (Utilities::GetTypeFromTypeInfo<Game::MissionManager>(Offsets::TypeInfo::MissionManager));
-		Game::GhostController* CurrentGhostController = (Utilities::GetTypeFromTypeInfo<Game::GhostController>(Offsets::TypeInfo::GhostController));
+		auto levelController = reinterpret_cast<Engine::LevelController*>(GameState::Pointers::LevelController);
+#if 0
+		Engine::GameController* CurrentGameController = Utils::GetTypeFromTypeInfo<Engine::GameController>(Offsets::TypeInfo::GameController);
+		Engine::EvidenceController* CurrentEvidenceController = Utils::GetTypeFromTypeInfo<Engine::EvidenceController>(Offsets::TypeInfo::EvidenceController);
+		Engine::MissionManager* CurrentMissionManager = Utils::GetTypeFromTypeInfo<Engine::MissionManager>(Offsets::TypeInfo::MissionManager);
+		Engine::GhostController* CurrentGhostController = Utils::GetTypeFromTypeInfo<Engine::GhostController>(Offsets::TypeInfo::GhostController);
 
 		{
 			System::List<Game::Mission>* MissionList = CurrentMissionManager->CurrentMissions;
@@ -320,7 +304,6 @@ namespace Idxhook {
 			GameState::EvidenceCount = EvidenceList->Size;
 		}
 
-#if 0
 		{
 			if (Menu::State::GhostLockSound || Menu::State::GhostUnlockSound) {
 				System::Array<Game::Door>* DoorArray = CurrentLevelController->DoorArray;
@@ -347,49 +330,58 @@ namespace Idxhook {
 			}
 		}
 #endif
-
 		{
-			Game::GhostAI* Ghost = CurrentLevelController->CurrentGhost;
-			Game::GhostInfo* GhostInfo = Ghost->Info;
+			Engine::GhostAI* ghost = levelController->CurrentGhost;
+#if 0
+			static std::string GhostNames[] =
+			{
+				"None", "Spirit", "Wraith", "Phantom", "Poltergeist", "Banshee", "Jinn", "Mare",
+				"Revenant", "Shade", "Demon", "Yurei", "Oni", "Yokai", "Hantu", "Goryo", "Myling"
+			};
 
-			static std::string GhostNames[] = { "None", "Spirit", "Wraith", "Phantom", "Poltergeist", "Banshee", "Jinn", "Mare",
-												"Revenant", "Shade", "Demon", "Yurei", "Oni", "Yokai", "Hantu", "Goryo", "Myling" };
+			static std::string GhostEvidences[] =
+			{
+				"None", "EMF Level 5, Spirit box, Ghost writing", "EMF Level 5, Spirit box, D.O.T.S Projector",
+				"Spirit box, Fingerprints, D.O.T.S Projector", "Spirit box, Fingerprints, Ghost writing",
+				"Ghost orbs, Fingerprints, D.O.T.S Projector", "EMF Level 5, Freezing temperatures, Fingerprints",
+				"Ghost orbs, Spirit box, Ghost writing", "Ghost orbs, Freezing temperatures, Ghost writing",
+				"EMF Level 5, Freezing temperatures, Ghost writing", "Freezing temperatures, Fingerprints, Ghost writing",
+				"Ghost orbs, Freezing temperatures, D.O.T.S Projector", "EMF Level 5, Freezing temperatures, D.O.T.S Projector",
+				"Ghost orbs, Spirit box, D.O.T.S Projector", "Ghost orbs, Freezing temperatures, Fingerprints",
+				"EMF Level 5, Fingerprints, D.O.T.S Projector", "EMF Level 5, Fingerprints, Ghost writing"
+			};
 
-			static std::string GhostEvidences[] = { "None", "EMF Level 5, Spirit box, Ghost writing", "EMF Level 5, Spirit box, D.O.T.S Projector",
-													"Spirit box, Fingerprints, D.O.T.S Projector", "Spirit box, Fingerprints, Ghost writing",
-													"Ghost orbs, Fingerprints, D.O.T.S Projector", "EMF Level 5, Freezing temperatures, Fingerprints",
-													"Ghost orbs, Spirit box, Ghost writing", "Ghost orbs, Freezing temperatures, Ghost writing",
-													"EMF Level 5, Freezing temperatures, Ghost writing", "Freezing temperatures, Fingerprints, Ghost writing",
-													"Ghost orbs, Freezing temperatures, D.O.T.S Projector", "EMF Level 5, Freezing temperatures, D.O.T.S Projector",
-													"Ghost orbs, Spirit box, D.O.T.S Projector", "Ghost orbs, Freezing temperatures, Fingerprints",
-													"EMF Level 5, Fingerprints, D.O.T.S Projector", "EMF Level 5, Fingerprints, Ghost writing" };
+			
+			Engine::GhostInfo* ghostInfo = ghost->Info;
 
-			GameState::GhostData::Name = System::Utilities::GetStringNative(GhostInfo->Name) + (GhostInfo->IsShy ? " (Shy)" : "");
-			GameState::GhostData::Age = std::to_string(GhostInfo->Age);
-			GameState::GhostData::Type = GhostNames[GhostInfo->Type];
-			GameState::GhostData::Evidence = GhostEvidences[GhostInfo->Type];
-			GameState::GhostData::Gender = GhostInfo->IsMale ? "Male" : "Female";
+			GameState::GhostData::Name = System::Utilities::GetStringNative(ghostInfo->Name) + (ghostInfo->IsShy ? " (Shy)" : "");
+			GameState::GhostData::Age = std::to_string(ghostInfo->Age);
+			GameState::GhostData::Type = GhostNames[ghostInfo->Type];
+			GameState::GhostData::Evidence = GhostEvidences[ghostInfo->Type];
+			GameState::GhostData::Gender = ghostInfo->IsMale ? "Male" : "Female";
 			GameState::GhostData::Room = System::Utilities::GetStringNative(CurrentLevelController->CurrentGhostRoom->RoomName);
-			GameState::GhostData::Hunting = Ghost->IsHunting ? "Yes" : "No";
+			GameState::GhostData::Hunting = ghost->IsHunting ? "Yes" : "No";
 
-			UnityEngine::Vector3 GhostPosition = Ghost->GetTransform()->GetPosition();
+			UnityEngine::Vector3 GhostPosition = ghost->GetTransform()->GetPosition();
 
 			GameState::GhostData::Distance = (int)UnityEngine::Vector3::Distance(MainCameraPosition, GhostPosition);
 			GameState::GhostData::WorldToScreen = WorldToScreen(MainCamera, GhostPosition, GameState::GhostData::Position, ScreenSizeVector);
 			GameState::GhostData::BonesWorldToScreen = true;
+#endif
+			std::array<BoneParams, 16> bones{};
+			static const auto& bonesIDs = BoneIDArray();
+			for (const auto& it : bonesIDs)
+			{
+				UnityEngine::Vector2 first{};
+				UnityEngine::Vector2 second{};
+				const size_t index = &it - &bonesIDs[0];
 
-			std::array<std::pair<UnityEngine::Vector2, UnityEngine::Vector2>, 16> BonesBuffer{ };
-
-			for (std::pair<UnityEngine::HumanBodyBones, UnityEngine::HumanBodyBones> BonePair : Bones) {
-				UnityEngine::Vector2 First{ };
-				UnityEngine::Vector2 Second{ };
-
-				GameState::GhostData::BonesWorldToScreen &= WorldToScreen(MainCamera, Ghost->Animator->GetBoneTransform(BonePair.first)->GetPosition(), First, ScreenSizeVector);
-				GameState::GhostData::BonesWorldToScreen &= WorldToScreen(MainCamera, Ghost->Animator->GetBoneTransform(BonePair.second)->GetPosition(), Second, ScreenSizeVector);
-
-				size_t index = &BonePair - &Bones[0];
-				BonesBuffer.at(index) = std::make_pair(First, Second);
+				bones[index] = ProjectWorldToScreen(cam, ghost->Animator->GetBoneTransform(it.first)->GetPosition(), first, screenSize)
+					&& ProjectWorldToScreen(cam, ghost->Animator->GetBoneTransform(it.second)->GetPosition(), second, screenSize)
+					? BoneParams{ first, second, true } : BoneParams{ {}, {}, false };
 			}
+
+			Bones() = bones;
 #if 0
 			HandleButton(Menu::State::GhostAppear, {
 				Ghost->Appear();
@@ -415,13 +407,10 @@ namespace Idxhook {
 									CurrentLevelController->SoundController->Photon->RPC(Marshal::PtrToStringAnsi((void*)"PlayDoorKnockingSound"), 0, nullptr);
 									})
 #endif
-				GameState::GhostData::Bones = BonesBuffer;
 		}
-
-		{
 #if 0
+		{
 			if (Menu::State::MaxLightsOverride) CurrentLevelController->CurrentFuseBox->MaxLights = 50;
-#endif
 
 			UnityEngine::Vector3 FuseBoxPosition = CurrentLevelController->CurrentFuseBox->GetTransform()->GetPosition();
 
@@ -431,7 +420,7 @@ namespace Idxhook {
 #endif
 	}
 
-	void Cheat::Hooks::Player::Update(Engine::Player* Player, void* Info)
+	void Cheat::Hooks::Player::Update(Engine::Player* Player, MethodInfo* Info)
 	{
 		Original::Player::Update(Player, Info);
 

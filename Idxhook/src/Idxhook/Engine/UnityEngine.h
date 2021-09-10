@@ -49,7 +49,7 @@ namespace Idxhook::UnityEngine {
         static Camera* GetMain() { return Memory::CallFunction<Camera*>(Offsets::Methods::Camera::GetMain); }
 		float GetFieldOfView() { return Memory::CallFunction<float, void*>(Offsets::Methods::Camera::GetFieldOfView, this); }
         void SetFieldOfView(float Value) { return Memory::CallFunction<void, void*, float>(Offsets::Methods::Camera::SetFieldOfView, this, Value); }
-        Vector3 WorldToScreenPoint(Vector3 Position) { return Memory::CallFunction<Vector3, void*, Vector3>(Offsets::Methods::Camera::WorldToScreenPoint, this, Position); }
+        Vector3 WorldToScreenPoint(const Vector3& Position) { return Memory::CallFunction<Vector3, void*, Vector3>(Offsets::Methods::Camera::WorldToScreenPoint, this, Position); }
     };
 
     class Rigidbody

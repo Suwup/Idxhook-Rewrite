@@ -47,6 +47,23 @@ namespace Idxhook {
 			{
 				do
 				{
+					ImGui::SetWindowPos({}, ImGuiCond_Always);
+					ImGui::SetWindowSize(*(const ImVec2*)&Cheat::ScreenSize(), ImGuiCond_Always);
+
+					{
+						const auto drawList = ImGui::GetOverlayDrawList();
+						static const ImColor color = ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 1.0f });
+
+						for (const auto& it : Cheat::Bones())
+						{
+							if (!it.Valid) break;
+							drawList->AddLine(*(const ImVec2*)&it.A, *(const ImVec2*)&it.B, color);
+						}
+					}
+				} while (false);
+
+				do
+				{
 					if (!s_Instance->m_MenuOpen) break;
 
 					float& fov = Cheat::FieldOfView();
