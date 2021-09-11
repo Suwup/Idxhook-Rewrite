@@ -86,6 +86,12 @@ namespace Idxhook::Engine {
 		};
     };
 
+	struct CharacterController
+	{
+		bool SimpleMove(const UnityEngine::Vector3& speed) { return Memory::CallFunction<bool, void*, UnityEngine::Vector3>(Offsets::Methods::CharacterController::SimpleMove, this, speed); }
+		UnityEngine::Vector3 GetVelocity() { return Memory::CallFunction<UnityEngine::Vector3, void*>(Offsets::Methods::CharacterController::GetVelocity, this); }
+	};
+
 	struct Player : public UnityEngine::Component
 	{
         union
@@ -94,6 +100,7 @@ namespace Idxhook::Engine {
             Member(bool, IsHunted, 0x20);
             Member(PlayerSanity*, Sanity, 0xA8);
             Member(PlayerStamina*, Stamina, 0xD0);
+            Member(CharacterController*, CharController, 0xD8);
             Member(FirstPersonController*, FirstPersonController, 0xE8);
             Member(PCPropGrab*, GrabProp, 0xF0);
             Member(UnityEngine::Animator*, Animator, 0x130);
@@ -243,4 +250,5 @@ namespace Idxhook::Engine {
             Member(System::List<Mission>*, CurrentMissions, 0x50);
         };
     };
+
 }

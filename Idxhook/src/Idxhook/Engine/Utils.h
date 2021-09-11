@@ -24,22 +24,22 @@ namespace Idxhook {
 		};
 
 		template <typename T>
-		static constexpr auto GetTypeFromTypeInfo = [](std::uintptr_t address) -> T*
+		static constexpr auto GetTypeFromTypeInfo = [](uintptr_t address) -> T*
 		{
-			return reinterpret_cast<T*>(**(std::uintptr_t**)(*(std::uintptr_t*)address + 0xb8));
+			return reinterpret_cast<T*>(**(uintptr_t**)(*(uintptr_t*)address + 0xb8));
 		};
 
 	}
 
 	namespace Memory {
 
-		static constexpr auto GetRVA = [](std::uintptr_t address) -> std::uintptr_t
+		static constexpr auto GetRVA = [](uintptr_t address) -> uintptr_t
 		{
-			return reinterpret_cast<std::uintptr_t>(GetGameAssembly()) + address;
+			return reinterpret_cast<uintptr_t>(GetGameAssembly()) + address;
 		};
 
 		template <class T>
-		static constexpr auto GetRVAPointer = [](std::uintptr_t address) -> T*
+		static constexpr auto GetRVAPointer = [](uintptr_t address) -> T*
 		{
 			auto ptr = reinterpret_cast<T*>(GetRVA(address));
 			if (!ptr) Utils::ReleaseFailure("Invalid VA pointer (outdated?)");
@@ -47,7 +47,7 @@ namespace Idxhook {
 		};
 
 		template <typename T, typename... Args>
-		static constexpr auto CallFunction = [](std::uintptr_t address, Args... args) -> T
+		static constexpr auto CallFunction = [](uintptr_t address, Args... args) -> T
 		{
 			return reinterpret_cast<T(*)(Args...)>(address)(std::forward<Args>(args)...);
 		};

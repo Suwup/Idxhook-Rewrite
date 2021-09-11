@@ -6,6 +6,8 @@
 
 #include "Idxhook/Engine/GameState.h"
 #include "Idxhook/Engine/Offsets.h"
+#include "Idxhook/Engine/System.h"
+#include "Idxhook/Engine/Other.h"
 
 #include <minhook.h>
 #include <iostream>
@@ -142,7 +144,7 @@ namespace Idxhook {
 		FieldOfView() = cam->GetFieldOfView();
 		if (!GameState::Pointers::CheckPointers()) return;
 
-		//UnityEngine::Vector3 camLoc = cam->GetTransform()->GetPosition();
+		auto camLoc = cam->GetTransform()->GetPosition();
 		auto& screenSize = ScreenSize();
 		screenSize = { (float)UnityEngine::Screen::GetWidth(), (float)UnityEngine::Screen::GetHeight() };
 
@@ -169,6 +171,7 @@ namespace Idxhook {
 		};
 
 		auto levelController = reinterpret_cast<Engine::LevelController*>(GameState::Pointers::LevelController);
+		auto evidenceController = Utils::GetTypeFromTypeInfo<Engine::EvidenceController>(Offsets::TypeInfo::EvidenceController);
 #if 0
 		Engine::GameController* CurrentGameController = Utils::GetTypeFromTypeInfo<Engine::GameController>(Offsets::TypeInfo::GameController);
 		Engine::EvidenceController* CurrentEvidenceController = Utils::GetTypeFromTypeInfo<Engine::EvidenceController>(Offsets::TypeInfo::EvidenceController);
@@ -330,6 +333,24 @@ namespace Idxhook {
 			}
 		}
 #endif
+		if (ItemEnable())
+		{
+			auto& items = Items();
+			static const char* evidenceTypes[] = { "EMF Spot", "Ouija Board", "Fingerprint", "Footstep", "Bone", "Ghost", "Dead Body", "Dirty Water" };
+			System::List<Engine::Evidence>* evidenceList = evidenceController->EvidenceList;
+
+			for (int i = 0; i < evidenceList->Size; i++)
+			{
+				Engine::Evidence* evidence = evidenceList->Items->Values[i];
+
+				auto loc = evidence->GetTransform()->GetPosition();
+
+				items[i].Valid = ProjectWorldToScreen(cam, loc, items[i].Location, screenSize);
+				items[i].Name = evidenceTypes[evidence->Type];
+			}
+		}
+
+		if (GhostEnable())
 		{
 			Engine::GhostAI* ghost = levelController->CurrentGhost;
 #if 0
@@ -368,20 +389,23 @@ namespace Idxhook {
 			GameState::GhostData::WorldToScreen = WorldToScreen(MainCamera, GhostPosition, GameState::GhostData::Position, ScreenSizeVector);
 			GameState::GhostData::BonesWorldToScreen = true;
 #endif
-			std::array<BoneParams, 16> bones{};
-			static const auto& bonesIDs = BoneIDArray();
-			for (const auto& it : bonesIDs)
+			if (GhostSkeleton())
 			{
-				UnityEngine::Vector2 first{};
-				UnityEngine::Vector2 second{};
-				const size_t index = &it - &bonesIDs[0];
+				std::array<BoneParams, 16> bones{};
+				static const auto& bonesIDs = BoneIDArray();
+				for (const auto& it : bonesIDs)
+				{
+					UnityEngine::Vector2 first{};
+					UnityEngine::Vector2 second{};
+					const size_t index = &it - &bonesIDs[0];
 
-				bones[index] = ProjectWorldToScreen(cam, ghost->Animator->GetBoneTransform(it.first)->GetPosition(), first, screenSize)
-					&& ProjectWorldToScreen(cam, ghost->Animator->GetBoneTransform(it.second)->GetPosition(), second, screenSize)
-					? BoneParams{ first, second, true } : BoneParams{ {}, {}, false };
+					bones[index] = ProjectWorldToScreen(cam, ghost->Animator->GetBoneTransform(it.first)->GetPosition(), first, screenSize)
+						&& ProjectWorldToScreen(cam, ghost->Animator->GetBoneTransform(it.second)->GetPosition(), second, screenSize)
+						? BoneParams{ true, first, second } : BoneParams{ false, {}, {} };
+				}
+
+				Bones() = bones;
 			}
-
-			Bones() = bones;
 #if 0
 			HandleButton(Menu::State::GhostAppear, {
 				Ghost->Appear();
@@ -427,23 +451,38 @@ namespace Idxhook {
 		if (!GameState::Pointers::CheckPointers()) return;
 
 		Engine::GameController* gameController = Utils::GetTypeFromTypeInfo<Engine::GameController>(Offsets::TypeInfo::GameController);
+		Engine::Player* localPlayer = gameController->MyPlayer->RealPlayer;
 
+		if (localPlayer == Player)
 		{
-			Engine::Player* localPlayer = gameController->MyPlayer->RealPlayer;
-
-			if (localPlayer == Player)
+			if (xQcSpeed())
 			{
-#if 0
-				if (Menu::State::Noclip)
-				{
-					Cheats::RunNoclip(localPlayer);
-				}
-				else
-				{
-					Cheats::ResetNoclip(localPlayer);
-				}
-#endif
+				auto charController = localPlayer->CharController;
+				if (!charController) return;
+
+				auto& multiplier = xQcSpeedMultiplier();
+				auto velocity = charController->GetVelocity();
+
+				velocity.X *= multiplier;
+				velocity.Y *= multiplier;
+				velocity.Z *= multiplier;
+
+				charController->SimpleMove(velocity);
+
+				// Update the velocity since it changed when we moved the player
+				localPlayer->Animator->SetFloat(Marshal::PtrToStringAnsi("speed"), charController->GetVelocity().Magnitude());
 			}
+
+#if 0
+			if (Menu::State::Noclip)
+			{
+				Cheats::RunNoclip(localPlayer);
+			}
+			else
+			{
+				Cheats::ResetNoclip(localPlayer);
+			}
+#endif
 		}
 	}
 

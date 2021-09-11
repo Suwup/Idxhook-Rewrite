@@ -18,9 +18,9 @@ namespace Idxhook::UnityEngine {
     public:
         float X, Y, Z;
 
-        static float Distance(Vector3 A, Vector3 B) { return Memory::CallFunction<float, Vector3, Vector3>(Offsets::Methods::Vector3::Distance, A, B); }
-        static Vector3 Addition(Vector3 A, Vector3 B) { return Memory::CallFunction<Vector3, Vector3, Vector3>(Offsets::Methods::Vector3::Addition, A, B); }
-		Vector3 operator+(const Vector3& other) const { return Addition(*this, other); }
+		float Magnitude() { return Memory::CallFunction<float, Vector3>(Offsets::Methods::Vector3::Magnitude, *this); }
+		float Distance(const Vector3& other) { return Memory::CallFunction<float, Vector3, Vector3>(Offsets::Methods::Vector3::Distance, *this, other); }
+		Vector3 Addition(const Vector3& other) { return Memory::CallFunction<Vector3, Vector3, Vector3>(Offsets::Methods::Vector3::Addition, *this, other); }
     };
 
     class Vector2
@@ -136,6 +136,12 @@ namespace Idxhook::UnityEngine {
     class Animator
 	{
     public:
+		float GetFloat(const System::String* name) { return Memory::CallFunction<float, void*, const System::String*>(Offsets::Methods::Animator::GetFloat, this, name); }
+		void SetFloat(const System::String* name, float value) { return Memory::CallFunction<void, void*, const System::String*, float>(Offsets::Methods::Animator::SetFloat, this, name, value); }
+		bool GetBool(const System::String* name) { return Memory::CallFunction<bool, void*, const System::String*>(Offsets::Methods::Animator::GetBool, this, name); }
+		void SetBool(const System::String* name, bool value) { return Memory::CallFunction<void, void*, const System::String*, bool>(Offsets::Methods::Animator::SetBool, this, name, value); }
+		int32_t GetInteger(const System::String* name) { return Memory::CallFunction<int32_t, void*, const System::String*>(Offsets::Methods::Animator::GetInteger, this, name); }
+		void SetInteger(const System::String* name, int32_t value) { return Memory::CallFunction<void, void*, const System::String*, int32_t>(Offsets::Methods::Animator::SetInteger, this, name, value); }
         Transform* GetBoneTransform(HumanBodyBones boneId) { return Memory::CallFunction<Transform*, void*, HumanBodyBones>(Offsets::Methods::Animator::GetBoneTransform, this, boneId); }
     };
 }

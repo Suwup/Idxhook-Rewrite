@@ -11,7 +11,7 @@ namespace Idxhook::System {
     public:
         union
 		{
-            Member(std::uint64_t, MaxLength, 0x18);
+            Member(uint64_t, MaxLength, 0x18);
             Member(T*, Values[32], 0x20);
         };
     };
@@ -23,7 +23,7 @@ namespace Idxhook::System {
         union
 		{
             Member(Array<T>*, Items, 0x10);
-            Member(int, Size, 0x18);
+            Member(int32_t, Size, 0x18);
         };
     };
 
@@ -32,16 +32,16 @@ namespace Idxhook::System {
     public:
         union
 		{
-            Member(unsigned short, Chars[32], 0x14);
+            Member(uint16_t, Chars[32], 0x14);
         };
     };
 
     namespace Utils {
 
-        auto GetStringNative = [](System::String* String) -> std::string
+        auto GetStringNative = [](System::String* str) -> std::string
 		{
-            std::u16string u16(reinterpret_cast<const char16_t*>(String->Chars));
-            return std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{ }.to_bytes(u16);
+            std::u16string u16(reinterpret_cast<const char16_t*>(str->Chars));
+            return std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.to_bytes(u16);
         };
 
     }

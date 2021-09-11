@@ -5,6 +5,8 @@
 #include "Idxhook/Engine/Engine.h"
 
 #include <array>
+#include <imgui.h>
+#undef DrawText
 
 namespace Idxhook {
 
@@ -21,17 +23,42 @@ namespace Idxhook {
 
 		static inline Cheat& Get() { return *s_Instance; }
 	private:
-		struct BoneParams
+		struct BaseParams
+		{
+			bool Valid = false;
+		};
+
+		struct BoneParams : public BaseParams
 		{
 			UnityEngine::Vector2 A = {};
 			UnityEngine::Vector2 B = {};
-			bool Valid = false;
+		};
+
+		struct ItemParams : public BaseParams
+		{
+			UnityEngine::Vector2 Location = {};
+			const char* Name = nullptr;
+		};
+	private:
+		enum class EBox : int32_t
+		{
+			ENone,
+			E2DBoxes,
+			E3DBoxes
 		};
 	public:
+		static bool& xQcSpeed() { return Get().IxQcSpeed(); }
+		static float& xQcSpeedMultiplier() { return Get().IxQcSpeedMultiplier(); }
+		static bool& Credits() { return Get().ICredits(); }
 		static bool& BlockFuseBox() { return Get().IBlockFuseBox(); }
 		static float& FieldOfView() { return Get().IFieldOfView(); }
+		static bool& ItemEnable() { return Get().IItemEnable(); }
+		static bool& GhostEnable() { return Get().IGhostEnable(); }
+		static bool& GhostSkeleton() { return Get().IGhostSkeleton(); }
 		static UnityEngine::Vector2& ScreenSize() { return Get().IScreenSize(); }
+		static EBox& GhostBoxType() { return Get().IGhostBoxType(); }
 		static std::array<BoneParams, 16>& Bones() { return Get().IBones(); }
+		static std::array<ItemParams, 15>& Items() { return Get().IItems(); }
 		static std::array<std::pair<BoneID, BoneID>, 16>& BoneIDArray() { return Get().IBoneIDArray(); }
 	private:
 		struct Hooks
@@ -84,17 +111,34 @@ namespace Idxhook {
 			struct Player { static inline std::add_pointer_t<void(Engine::Player*, MethodInfo*)> Update = nullptr; };
 		};
 	private:
+		bool& IxQcSpeed() { return m_xQcSpeed; }
+		float& IxQcSpeedMultiplier() { return m_xQcSpeedMultiplier; }
+		bool& ICredits() { return m_Credits; }
 		bool& IBlockFuseBox() { return m_BlockFuseBox; }
 		float& IFieldOfView() { return m_FieldOfView; }
+		bool& IItemEnable() { return m_ItemEnable; }
+		bool& IGhostEnable() { return m_GhostEnable; }
+		bool& IGhostSkeleton() { return m_GhostSkeleton; }
 		UnityEngine::Vector2& IScreenSize() { return m_ScreenSize; }
+		EBox& IGhostBoxType() { return m_GhostBoxType; }
 		std::array<BoneParams, 16>& IBones() { return m_Bones; }
+		std::array<ItemParams, 15>& IItems() { return m_Items; }
 		std::array<std::pair<BoneID, BoneID>, 16>& IBoneIDArray() { return m_BoneIDArray; }
 	private:
+		bool m_xQcSpeed = false;
+		float m_xQcSpeedMultiplier = 0.0f;
+		bool m_Credits = true;
 		bool m_BlockFuseBox = false;
 		float m_FieldOfView = 0.0f;
+		bool m_ItemEnable = true;
+		bool m_GhostEnable = true;
+		bool m_GhostSkeleton = true;
+
 		UnityEngine::Vector2 m_ScreenSize = {};
 
+		EBox m_GhostBoxType = EBox::ENone;
 		std::array<BoneParams, 16> m_Bones = {};
+		std::array<ItemParams, 15> m_Items = {};
 		std::array<std::pair<BoneID, BoneID>, 16> m_BoneIDArray =
 		{ {
 			{ BoneID::Head, BoneID::UpperChest },
