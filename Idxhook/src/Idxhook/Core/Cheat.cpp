@@ -19,9 +19,9 @@ namespace Idxhook {
 #define BIND_FN(loc, fn) BIND_FN_IMPL(#loc"::"#fn, Offsets::Hooks::loc::fn, reinterpret_cast<void*>(&Hooks::loc::fn), reinterpret_cast<void**>(&Original::loc::fn))
 
 #define LOG_OFFSET(name, offset) std::cout << #name" -> 0x" << std::hex << offset << "\n"
-#define OFFSET_METHOD(name, str) LOG_OFFSET(name, (Offsets::Methods:: ## name = Memory::GetRVA(functionMap.find(str)->second)))
+#define OFFSET_METHOD(name, ...) LOG_OFFSET(name, (Offsets::Methods:: ## name = Memory::GetRVA(functionMap.find(__VA_ARGS__#name)->second)))
 #define OFFSET_TYPE_INFO(name) LOG_OFFSET(name, (Offsets::TypeInfo:: ## name = Memory::GetRVA(typeInfoMap.find(#name"_c*")->second)))
-#define OFFSET_HOOK(name, str) LOG_OFFSET(name, (Offsets::Hooks:: ## name = Memory::GetRVAPointer<void>(functionMap.find(str)->second)))
+#define OFFSET_HOOK(name, ...) LOG_OFFSET(name, (Offsets::Hooks:: ## name = Memory::GetRVAPointer<void>(functionMap.find(__VA_ARGS__#name)->second)))
 
 	Cheat* Cheat::s_Instance = nullptr;
 
@@ -42,55 +42,55 @@ namespace Idxhook {
 
 		// Methods
 		{
-			OFFSET_METHOD(Screen::get_width, "UnityEngine.Screen::get_width");
-			OFFSET_METHOD(Screen::get_height, "UnityEngine.Screen::get_height");
+			OFFSET_METHOD(Screen::get_width, "UnityEngine.");
+			OFFSET_METHOD(Screen::get_height, "UnityEngine.");
 
-			OFFSET_METHOD(Camera::get_main, "UnityEngine.Camera::get_main");
-			OFFSET_METHOD(Camera::get_fieldOfView, "UnityEngine.Camera::get_fieldOfView");
-			OFFSET_METHOD(Camera::set_fieldOfView, "UnityEngine.Camera::set_fieldOfView");
-			OFFSET_METHOD(Camera::WorldToScreenPoint, "UnityEngine.Camera::WorldToScreenPoint");
+			OFFSET_METHOD(Camera::get_main, "UnityEngine.");
+			OFFSET_METHOD(Camera::get_fieldOfView, "UnityEngine.");
+			OFFSET_METHOD(Camera::set_fieldOfView, "UnityEngine.");
+			OFFSET_METHOD(Camera::WorldToScreenPoint, "UnityEngine.");
 
-			OFFSET_METHOD(Component::get_transform, "UnityEngine.Component::get_transform");
+			OFFSET_METHOD(Component::get_transform, "UnityEngine.");
 
-			OFFSET_METHOD(Transform::get_position, "UnityEngine.Transform::get_position");
-			OFFSET_METHOD(Transform::set_position, "UnityEngine.Transform::set_position");
-			OFFSET_METHOD(Transform::TransformDirection, "UnityEngine.Transform::TransformDirection");
+			OFFSET_METHOD(Transform::get_position, "UnityEngine.");
+			OFFSET_METHOD(Transform::set_position, "UnityEngine.");
+			OFFSET_METHOD(Transform::TransformDirection, "UnityEngine.");
 
-			OFFSET_METHOD(Vector3::Distance, "UnityEngine.Vector3::Distance");
-			OFFSET_METHOD(Vector3::Magnitude, "UnityEngine.Vector3::Magnitude");
-			OFFSET_METHOD(Vector3::op_Addition, "UnityEngine.Vector3::op_Addition");
+			OFFSET_METHOD(Vector3::Distance, "UnityEngine.");
+			OFFSET_METHOD(Vector3::Magnitude, "UnityEngine.");
+			OFFSET_METHOD(Vector3::op_Addition, "UnityEngine.");
 
-			OFFSET_METHOD(CharacterController::SimpleMove, "UnityEngine.CharacterController::SimpleMove");
-			OFFSET_METHOD(CharacterController::get_velocity, "UnityEngine.CharacterController::get_velocity");
+			OFFSET_METHOD(CharacterController::SimpleMove, "UnityEngine.");
+			OFFSET_METHOD(CharacterController::get_velocity, "UnityEngine.");
 
-			OFFSET_METHOD(Text::get_text, "UnityEngine.UI.Text::get_text");
+			OFFSET_METHOD(Text::get_text, "UnityEngine.UI.");
 
-			OFFSET_METHOD(Scene::GetBuildIndexInternal, "UnityEngine.SceneManagement.Scene::GetBuildIndexInternal");
+			OFFSET_METHOD(Scene::GetBuildIndexInternal, "UnityEngine.SceneManagement.");
 
-			OFFSET_METHOD(Animator::GetFloat, "UnityEngine.Animator::GetFloat");
-			OFFSET_METHOD(Animator::SetFloat, "UnityEngine.Animator::SetFloat");
-			OFFSET_METHOD(Animator::GetBool, "UnityEngine.Animator::GetBool");
-			OFFSET_METHOD(Animator::SetBool, "UnityEngine.Animator::SetBool");
-			OFFSET_METHOD(Animator::GetInteger, "UnityEngine.Animator::GetInteger");
-			OFFSET_METHOD(Animator::SetInteger, "UnityEngine.Animator::SetInteger");
-			OFFSET_METHOD(Animator::GetBoneTransform, "UnityEngine.Animator::GetBoneTransform");
+			OFFSET_METHOD(Animator::GetFloat, "UnityEngine.");
+			OFFSET_METHOD(Animator::SetFloat, "UnityEngine.");
+			OFFSET_METHOD(Animator::GetBool, "UnityEngine.");
+			OFFSET_METHOD(Animator::SetBool, "UnityEngine.");
+			OFFSET_METHOD(Animator::GetInteger, "UnityEngine.");
+			OFFSET_METHOD(Animator::SetInteger, "UnityEngine.");
+			OFFSET_METHOD(Animator::GetBoneTransform, "UnityEngine.");
 
-			OFFSET_METHOD(Rigidbody::set_mass, "UnityEngine.Rigidbody::set_mass");
+			OFFSET_METHOD(Rigidbody::set_mass, "UnityEngine.");
 
-			OFFSET_METHOD(PhotonNetwork::set_NickName, "Photon.Pun.PhotonNetwork::set_NickName");
-			OFFSET_METHOD(PhotonNetwork::get_IsMasterClient, "Photon.Pun.PhotonNetwork::get_IsMasterClient");
+			OFFSET_METHOD(PhotonNetwork::set_NickName, "Photon.Pun.");
+			OFFSET_METHOD(PhotonNetwork::get_IsMasterClient, "Photon.Pun.");
 
-			OFFSET_METHOD(PhotonView::RPC, "Photon.Pun.PhotonView::RPC");
+			OFFSET_METHOD(PhotonView::RPC, "Photon.Pun.");
 
-			OFFSET_METHOD(Marshal::PtrToStringAnsi, "System.Runtime.InteropServices.Marshal::PtrToStringAnsi");
+			OFFSET_METHOD(Marshal::PtrToStringAnsi, "System.Runtime.InteropServices.");
 
-			OFFSET_METHOD(Mission::Completed, "Mission::Completed");
+			OFFSET_METHOD(Mission::Completed);
 
-			OFFSET_METHOD(GhostAI::Appear, "GhostAI::Appear");
-			OFFSET_METHOD(GhostAI::RandomEvent, "GhostAI::RandomEvent");
+			OFFSET_METHOD(GhostAI::Appear);
+			OFFSET_METHOD(GhostAI::RandomEvent);
 
-			OFFSET_METHOD(GhostActivity::Interact, "GhostActivity::Interact");
-			OFFSET_METHOD(GhostActivity::InteractWithARandomDoor, "GhostActivity::InteractWithARandomDoor");
+			OFFSET_METHOD(GhostActivity::Interact);
+			OFFSET_METHOD(GhostActivity::InteractWithARandomDoor);
 		}
 
 		// Type info
@@ -103,27 +103,27 @@ namespace Idxhook {
 
 		// Hooked methods
 		{
-			OFFSET_HOOK(GUIUtility::CheckOnGUI, "UnityEngine.GUIUtility::CheckOnGUI");
+			OFFSET_HOOK(GUIUtility::CheckOnGUI, "UnityEngine.");
 
-			OFFSET_HOOK(GhostAI::Start, "GhostAI::Start");
+			OFFSET_HOOK(GhostAI::Start);
 
-			OFFSET_HOOK(DNAEvidence::Start, "DNAEvidence::Start");
+			OFFSET_HOOK(DNAEvidence::Start);
 
-			OFFSET_HOOK(LevelController::Start, "LevelController::Start");
+			OFFSET_HOOK(LevelController::Start);
 
-			OFFSET_HOOK(GameController::Exit, "GameController::Exit");
+			OFFSET_HOOK(GameController::Exit);
 
-			OFFSET_HOOK(PauseMenuController::Leave, "PauseMenuController::Leave");
+			OFFSET_HOOK(PauseMenuController::Leave);
 
-			OFFSET_HOOK(RewardManager::Awake, "RewardManager::Awake");
+			OFFSET_HOOK(RewardManager::Awake);
 
-			OFFSET_HOOK(Player::Update, "Player::Update");
+			OFFSET_HOOK(Player::Update);
 
-			OFFSET_HOOK(SceneManager::LoadScene, "UnityEngine.SceneManagement.SceneManager::LoadScene");
-			OFFSET_HOOK(SceneManager::Internal_SceneLoaded, "UnityEngine.SceneManagement.SceneManager::Internal_SceneLoaded");
+			OFFSET_HOOK(SceneManager::LoadScene, "UnityEngine.SceneManagement.");
+			OFFSET_HOOK(SceneManager::Internal_SceneLoaded, "UnityEngine.SceneManagement.");
 
-			OFFSET_HOOK(FuseBox::TurnOff, "FuseBox::TurnOff");
-			OFFSET_HOOK(FuseBox::Use, "FuseBox::Use");
+			OFFSET_HOOK(FuseBox::TurnOff);
+			OFFSET_HOOK(FuseBox::Use);
 		}
 
 		MH_Initialize();
