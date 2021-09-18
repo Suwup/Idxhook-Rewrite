@@ -98,12 +98,12 @@ namespace Idxhook::Engine {
 		{
             Member(PhotonView*, Photon, 0x18);
             Member(bool, IsHunted, 0x20);
-            Member(PlayerSanity*, Sanity, 0xA8);
-            Member(PlayerStamina*, Stamina, 0xD0);
-            Member(CharacterController*, CharController, 0xD8);
-            Member(FirstPersonController*, FirstPersonController, 0xE8);
-            Member(PCPropGrab*, GrabProp, 0xF0);
-            Member(UnityEngine::Animator*, Animator, 0x130);
+            Member(PlayerSanity*, Sanity, 0xB0);
+            Member(PlayerStamina*, Stamina, 0xE0);
+            Member(CharacterController*, CharController, 0xE8);
+            Member(FirstPersonController*, FirstPersonController, 0xF8);
+            Member(PCPropGrab*, GrabProp, 0x100);
+            Member(UnityEngine::Animator*, Animator, 0x140);
         };
     };
 
@@ -151,7 +151,7 @@ namespace Idxhook::Engine {
 	{
         union
 		{
-            Member(GhostEventPlayer*, EventPlayer, 0x60);
+            Member(GhostEventPlayer*, EventPlayer, 0x58);
         };
     };
 

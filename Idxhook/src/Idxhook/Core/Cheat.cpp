@@ -18,10 +18,10 @@ namespace Idxhook {
 #define BIND_FN_IMPL(msg, target, detour, original) LOG_STATUS(msg, MH_CreateHook(target, detour, original))
 #define BIND_FN(loc, fn) BIND_FN_IMPL(#loc"::"#fn, Offsets::Hooks::loc::fn, reinterpret_cast<void*>(&Hooks::loc::fn), reinterpret_cast<void**>(&Original::loc::fn))
 
-#define LOG_OFFSET(name, offset) std::cout << #name" -> 0x" << std::hex << offset << "\n"
-#define OFFSET_METHOD(name, ...) LOG_OFFSET(name, (Offsets::Methods:: ## name = Memory::GetRVA(functionMap.find(__VA_ARGS__#name)->second)))
-#define OFFSET_TYPE_INFO(name) LOG_OFFSET(name, (Offsets::TypeInfo:: ## name = Memory::GetRVA(typeInfoMap.find(#name"_c*")->second)))
-#define OFFSET_HOOK(name, ...) LOG_OFFSET(name, (Offsets::Hooks:: ## name = Memory::GetRVAPointer<void>(functionMap.find(__VA_ARGS__#name)->second)))
+#define LOG_OFFSET(name, offset) std::cout << name << " -> 0x" << std::hex << offset << "\n"
+#define OFFSET_METHOD(name, ...) { auto found = functionMap.find(__VA_ARGS__#name); LOG_OFFSET(found->first, (Offsets::Methods:: ## name = Memory::GetRVA(found->second))); }
+#define OFFSET_TYPE_INFO(name) { auto found = typeInfoMap.find(#name); LOG_OFFSET(found->first, (Offsets::TypeInfo:: ## name = Memory::GetRVA(found->second))); }
+#define OFFSET_HOOK(name, ...) { auto found = functionMap.find(__VA_ARGS__#name); LOG_OFFSET(found->first, (Offsets::Hooks:: ## name = Memory::GetRVAPointer<void>(found->second))); }
 
 	Cheat* Cheat::s_Instance = nullptr;
 
