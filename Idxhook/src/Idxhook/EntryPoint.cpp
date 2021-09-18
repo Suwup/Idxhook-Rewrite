@@ -15,7 +15,7 @@ static void Init()
 	FILE* f = nullptr;
 	freopen_s(&f, "CONOUT$", "w", stdout);
 
-	const std::string fileName = "script.json";
+	const std::string fileName = "offsets.json";
 	if (!std::filesystem::exists(fileName))
 	{
 		std::cout << "The file: '" << fileName << "' was not found, please dump the game with Suwup's fork of il2cpp dumper and place '" << fileName << "' in the games root directory!\n";
@@ -29,7 +29,7 @@ static void Init()
 
 	auto& functionMap = Idxhook::Cheat::FunctionMap();
 
-	auto functions = script["Functions"];
+	auto functions = script["Methods"];
 	for (auto& it : functions)
 	{
 		const uintptr_t offset = it["Address"].get<uintptr_t>();

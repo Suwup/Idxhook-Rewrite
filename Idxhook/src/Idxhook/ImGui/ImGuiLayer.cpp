@@ -187,7 +187,7 @@ namespace Idxhook {
 		m_Window = desc.OutputWindow;
 
 		ID3D11Texture2D* resource = nullptr;
-		swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&resource);
+		swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&resource);
 
 		if (resource)
 		{
