@@ -4,8 +4,8 @@
 
 namespace Idxhook::PhotonNetwork {
 
-	static void SetNickname(System::String* Nickname) { return Memory::CallFunction<void, System::String*>(Offsets::Methods::PhotonNetwork::SetNickName, Nickname); }
-	static bool IsMasterClient() { return Memory::CallFunction<bool>(Offsets::Methods::PhotonNetwork::IsMasterClient); }
+	static void SetNickname(System::String* Nickname) { return Memory::CallFunction<void, System::String*>(Offsets::Methods::PhotonNetwork::set_NickName, Nickname); }
+	static bool IsMasterClient() { return Memory::CallFunction<bool>(Offsets::Methods::PhotonNetwork::get_IsMasterClient); }
 
 }
 

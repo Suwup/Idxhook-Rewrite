@@ -89,7 +89,7 @@ namespace Idxhook::Engine {
 	struct CharacterController
 	{
 		bool SimpleMove(const UnityEngine::Vector3& speed) { return Memory::CallFunction<bool, void*, UnityEngine::Vector3>(Offsets::Methods::CharacterController::SimpleMove, this, speed); }
-		UnityEngine::Vector3 GetVelocity() { return Memory::CallFunction<UnityEngine::Vector3, void*>(Offsets::Methods::CharacterController::GetVelocity, this); }
+		UnityEngine::Vector3 GetVelocity() { return Memory::CallFunction<UnityEngine::Vector3, void*>(Offsets::Methods::CharacterController::get_velocity, this); }
 	};
 
 	struct Player : public UnityEngine::Component

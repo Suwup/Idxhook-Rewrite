@@ -61,10 +61,21 @@ namespace Idxhook {
 					{
 						if (Cheat::GhostSkeleton())
 						{
-							for (const auto& it : Cheat::Bones())
+							for (const auto& it : Cheat::GhostBones())
 							{
 								if (!it.Valid) break;
 								drawList->AddLine(*(const ImVec2*)&it.A, *(const ImVec2*)&it.B, color);
+							}
+						}
+
+						auto& box = Cheat::GhostBox();
+						if (box.Valid)
+						{
+							for (auto i = 0; i < 4; i++)
+							{
+								drawList->AddLine(*(const ImVec2*)&box.Location[0][i], *(const ImVec2*)&box.Location[0][(i + 1) % 4], color, false);
+								drawList->AddLine(*(const ImVec2*)&box.Location[1][i], *(const ImVec2*)&box.Location[1][(i + 1) % 4], color, false);
+								drawList->AddLine(*(const ImVec2*)&box.Location[0][i], *(const ImVec2*)&box.Location[1][i], color, false);
 							}
 						}
 					}
@@ -190,6 +201,7 @@ namespace Idxhook {
 		// Setting up ImGui
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		io.IniFilename = "BussySaka.ini";							// Since phasmophobia looks for "imgui.ini"
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
 		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking

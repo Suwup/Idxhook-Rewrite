@@ -2,125 +2,122 @@
 
 namespace Idxhook::Offsets {
 
-#define OFFSET(name, offset) inline uintptr_t name = Memory::GetRVA(offset)
-#define OFFSET_PTR(name, offset) inline void* name = Memory::GetRVAPointer<void>(offset)
-
     namespace Methods {
 
         namespace Screen {
 
-			OFFSET(GetWidth, 0xb5a170);
-			OFFSET(GetHeight, 0xb5a110);
+			inline uintptr_t get_width = 0;
+			inline uintptr_t get_height = 0;
 
         }
 
         namespace Camera {
 
-            OFFSET(GetMain, 0xafe3d0);
-            OFFSET(GetFieldOfView, 0xafe350);
-            OFFSET(SetFieldOfView, 0xaff010);
-            OFFSET(WorldToScreenPoint, 0xafdcd0);
+            inline uintptr_t get_main = 0;
+            inline uintptr_t get_fieldOfView = 0;
+            inline uintptr_t set_fieldOfView = 0;
+            inline uintptr_t WorldToScreenPoint = 0;
 
         }
 
-        namespace Component { OFFSET(GetTransform, 0xb011e0); }
+        namespace Component { inline uintptr_t get_transform = 0; }
 
         namespace Transform {
 
-			OFFSET(GetPosition, 0xb658b0);
-			OFFSET(SetPosition, 0xb661f0);
-			OFFSET(TransformDirection, 0xb64d00);
+			inline uintptr_t get_position = 0;
+			inline uintptr_t set_position = 0;
+			inline uintptr_t TransformDirection = 0;
 
         }
 
         namespace Vector3 {
 
-			OFFSET(Magnitude, 0x103bc70);
-			OFFSET(Distance, 0x103b8d0);
-			OFFSET(Addition, 0x103ddc0);
+			inline uintptr_t Distance = 0;
+			inline uintptr_t Magnitude = 0;
+			inline uintptr_t op_Addition = 0;
 
         }
 
 		namespace CharacterController {
 
-			OFFSET(SimpleMove, 0x1080100);
-			OFFSET(GetVelocity, 0x1080300);
+			inline uintptr_t SimpleMove = 0;
+			inline uintptr_t get_velocity = 0;
 
 		}
 
-		namespace Text { OFFSET(GetText, 0x2eeeb0); }
-		namespace Scene { OFFSET(GetBuildIndexInternal, 0xb59970); }
+		namespace Text { inline uintptr_t get_text = 0; }
+		namespace Scene { inline uintptr_t GetBuildIndexInternal = 0; }
 
 		namespace Animator {
 
-			OFFSET(GetFloat, 0x1096720);
-			OFFSET(SetFloat, 0x1096a60);
-			OFFSET(GetBool, 0x1096630);
-			OFFSET(SetBool, 0x1096a00);
-			OFFSET(GetInteger, 0x1096770);
-			OFFSET(SetInteger, 0x1096e40);
-			OFFSET(GetBoneTransform, 0x1096540);
+			inline uintptr_t GetFloat = 0;
+			inline uintptr_t SetFloat = 0;
+			inline uintptr_t GetBool = 0;
+			inline uintptr_t SetBool = 0;
+			inline uintptr_t GetInteger = 0;
+			inline uintptr_t SetInteger = 0;
+			inline uintptr_t GetBoneTransform = 0;
 
 		}
 
-		namespace Rigidbody { OFFSET(SetMass, 0x1089530); }
+		namespace Rigidbody { inline uintptr_t set_mass = 0; }
 
 		namespace PhotonNetwork
 		{
-			OFFSET(SetNickName, 0x656020);
-			OFFSET(IsMasterClient, 0x653c20);
+			inline uintptr_t set_NickName = 0;
+			inline uintptr_t get_IsMasterClient = 0;
 		}
 
-		namespace PhotonView { OFFSET(RPC, 0x2ac68f0); }
-		namespace Marshal { OFFSET(PtrToStringAnsi, 0x502f00); }
-		namespace Mission { OFFSET(Completed, 0x1f97400); }
+		namespace PhotonView { inline uintptr_t RPC = 0; }
+		namespace Marshal { inline uintptr_t PtrToStringAnsi = 0; }
+		namespace Mission { inline uintptr_t Completed = 0; }
 
         namespace GhostAI {
 
-			OFFSET(Appear, 0x11e5280);
-			OFFSET(RandomEvent, 0x11e6440);
+			inline uintptr_t Appear = 0;
+			inline uintptr_t RandomEvent = 0;
 
         }
 
         namespace GhostActivity {
 
-			OFFSET(Interact, 0x11eb250);
-			OFFSET(InteractWithARandomDoor, 0x11ea890);
+			inline uintptr_t Interact = 0;
+			inline uintptr_t InteractWithARandomDoor = 0;
 
         }
     }
 
     namespace TypeInfo {
 
-		OFFSET(GameController, 0x35ac680);
-		OFFSET(EvidenceController, 0x35ac460);
-		OFFSET(MissionManager, 0x35abcb8);
-		OFFSET(GhostController, 0x35ab2d8);
+		inline uintptr_t GameController = 0;
+		inline uintptr_t EvidenceController = 0;
+		inline uintptr_t MissionManager = 0;
+		inline uintptr_t GhostController = 0;
 
     }
 
     namespace Hooks {
 
-        namespace GUIUtility { OFFSET_PTR(CheckOnGUI, 0x10592e0); }
-        namespace GhostAI { OFFSET_PTR(Start, 0x11e6b70); }
-        namespace DNAEvidence { OFFSET_PTR(Start, 0x20cce20); }
-        namespace LevelController { OFFSET_PTR(Start, 0x14e82a0); }
-        namespace GameController { OFFSET_PTR(Exit, 0x11d4270); }
-        namespace PauseMenuController { OFFSET_PTR(Leave, 0x18ac6a0); }
-        namespace RewardManager { OFFSET_PTR(Awake, 0x1ce6910); }
-        namespace Player { OFFSET_PTR(Update, 0x1793f30); }
+        namespace GUIUtility { inline void* CheckOnGUI = nullptr; }
+        namespace GhostAI { inline void* Start = nullptr; }
+        namespace DNAEvidence { inline void* Start = nullptr; }
+        namespace LevelController { inline void* Start = nullptr; }
+        namespace GameController { inline void* Exit = nullptr; }
+        namespace PauseMenuController { inline void* Leave = nullptr; }
+        namespace RewardManager { inline void* Awake = nullptr; }
+        namespace Player { inline void* Update = nullptr; }
 
         namespace SceneManager {
 
-            OFFSET_PTR(LoadScene, 0xb593f0);
-            OFFSET_PTR(SceneLoaded, 0xb58c80);
+            inline void* LoadScene = nullptr;
+            inline void* Internal_SceneLoaded = nullptr;
 
         }
 
         namespace FuseBox {
 
-            OFFSET_PTR(Use, 0x2026c60);
-            OFFSET_PTR(TurnOff, 0x201e390);
+			inline void* TurnOff = nullptr;
+            inline void* Use = nullptr;
 
         }
 

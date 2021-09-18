@@ -18,6 +18,11 @@ namespace Idxhook {
 #define BIND_FN_IMPL(msg, target, detour, original) LOG_STATUS(msg, MH_CreateHook(target, detour, original))
 #define BIND_FN(loc, fn) BIND_FN_IMPL(#loc"::"#fn, Offsets::Hooks::loc::fn, reinterpret_cast<void*>(&Hooks::loc::fn), reinterpret_cast<void**>(&Original::loc::fn))
 
+#define LOG_OFFSET(name, offset) std::cout << #name" -> 0x" << std::hex << offset << "\n"
+#define OFFSET_METHOD(name, str) LOG_OFFSET(name, (Offsets::Methods:: ## name = Memory::GetRVA(functionMap.find(str)->second)))
+#define OFFSET_TYPE_INFO(name) LOG_OFFSET(name, (Offsets::TypeInfo:: ## name = Memory::GetRVA(typeInfoMap.find(#name"_c*")->second)))
+#define OFFSET_HOOK(name, str) LOG_OFFSET(name, (Offsets::Hooks:: ## name = Memory::GetRVAPointer<void>(functionMap.find(str)->second)))
+
 	Cheat* Cheat::s_Instance = nullptr;
 
 	Cheat::Cheat()
@@ -31,6 +36,96 @@ namespace Idxhook {
 
 	void Cheat::Run()
 	{
+		// Maps containing our offsets set on entry point
+		auto& functionMap = FunctionMap();
+		auto& typeInfoMap = TypeInfoMap();
+
+		// Methods
+		{
+			OFFSET_METHOD(Screen::get_width, "UnityEngine.Screen::get_width");
+			OFFSET_METHOD(Screen::get_height, "UnityEngine.Screen::get_height");
+
+			OFFSET_METHOD(Camera::get_main, "UnityEngine.Camera::get_main");
+			OFFSET_METHOD(Camera::get_fieldOfView, "UnityEngine.Camera::get_fieldOfView");
+			OFFSET_METHOD(Camera::set_fieldOfView, "UnityEngine.Camera::set_fieldOfView");
+			OFFSET_METHOD(Camera::WorldToScreenPoint, "UnityEngine.Camera::WorldToScreenPoint");
+
+			OFFSET_METHOD(Component::get_transform, "UnityEngine.Component::get_transform");
+
+			OFFSET_METHOD(Transform::get_position, "UnityEngine.Transform::get_position");
+			OFFSET_METHOD(Transform::set_position, "UnityEngine.Transform::set_position");
+			OFFSET_METHOD(Transform::TransformDirection, "UnityEngine.Transform::TransformDirection");
+
+			OFFSET_METHOD(Vector3::Distance, "UnityEngine.Vector3::Distance");
+			OFFSET_METHOD(Vector3::Magnitude, "UnityEngine.Vector3::Magnitude");
+			OFFSET_METHOD(Vector3::op_Addition, "UnityEngine.Vector3::op_Addition");
+
+			OFFSET_METHOD(CharacterController::SimpleMove, "UnityEngine.CharacterController::SimpleMove");
+			OFFSET_METHOD(CharacterController::get_velocity, "UnityEngine.CharacterController::get_velocity");
+
+			OFFSET_METHOD(Text::get_text, "UnityEngine.UI.Text::get_text");
+
+			OFFSET_METHOD(Scene::GetBuildIndexInternal, "UnityEngine.SceneManagement.Scene::GetBuildIndexInternal");
+
+			OFFSET_METHOD(Animator::GetFloat, "UnityEngine.Animator::GetFloat");
+			OFFSET_METHOD(Animator::SetFloat, "UnityEngine.Animator::SetFloat");
+			OFFSET_METHOD(Animator::GetBool, "UnityEngine.Animator::GetBool");
+			OFFSET_METHOD(Animator::SetBool, "UnityEngine.Animator::SetBool");
+			OFFSET_METHOD(Animator::GetInteger, "UnityEngine.Animator::GetInteger");
+			OFFSET_METHOD(Animator::SetInteger, "UnityEngine.Animator::SetInteger");
+			OFFSET_METHOD(Animator::GetBoneTransform, "UnityEngine.Animator::GetBoneTransform");
+
+			OFFSET_METHOD(Rigidbody::set_mass, "UnityEngine.Rigidbody::set_mass");
+
+			OFFSET_METHOD(PhotonNetwork::set_NickName, "Photon.Pun.PhotonNetwork::set_NickName");
+			OFFSET_METHOD(PhotonNetwork::get_IsMasterClient, "Photon.Pun.PhotonNetwork::get_IsMasterClient");
+
+			OFFSET_METHOD(PhotonView::RPC, "Photon.Pun.PhotonView::RPC");
+
+			OFFSET_METHOD(Marshal::PtrToStringAnsi, "System.Runtime.InteropServices.Marshal::PtrToStringAnsi");
+
+			OFFSET_METHOD(Mission::Completed, "Mission::Completed");
+
+			OFFSET_METHOD(GhostAI::Appear, "GhostAI::Appear");
+			OFFSET_METHOD(GhostAI::RandomEvent, "GhostAI::RandomEvent");
+
+			OFFSET_METHOD(GhostActivity::Interact, "GhostActivity::Interact");
+			OFFSET_METHOD(GhostActivity::InteractWithARandomDoor, "GhostActivity::InteractWithARandomDoor");
+		}
+
+		// Type info
+		{
+			OFFSET_TYPE_INFO(GameController);
+			OFFSET_TYPE_INFO(EvidenceController);
+			OFFSET_TYPE_INFO(MissionManager);
+			OFFSET_TYPE_INFO(GhostController);
+		}
+
+		// Hooked methods
+		{
+			OFFSET_HOOK(GUIUtility::CheckOnGUI, "UnityEngine.GUIUtility::CheckOnGUI");
+
+			OFFSET_HOOK(GhostAI::Start, "GhostAI::Start");
+
+			OFFSET_HOOK(DNAEvidence::Start, "DNAEvidence::Start");
+
+			OFFSET_HOOK(LevelController::Start, "LevelController::Start");
+
+			OFFSET_HOOK(GameController::Exit, "GameController::Exit");
+
+			OFFSET_HOOK(PauseMenuController::Leave, "PauseMenuController::Leave");
+
+			OFFSET_HOOK(RewardManager::Awake, "RewardManager::Awake");
+
+			OFFSET_HOOK(Player::Update, "Player::Update");
+
+			OFFSET_HOOK(SceneManager::LoadScene, "UnityEngine.SceneManagement.SceneManager::LoadScene");
+			OFFSET_HOOK(SceneManager::Internal_SceneLoaded, "UnityEngine.SceneManagement.SceneManager::Internal_SceneLoaded");
+
+			OFFSET_HOOK(FuseBox::TurnOff, "FuseBox::TurnOff");
+			OFFSET_HOOK(FuseBox::Use, "FuseBox::Use");
+		}
+
 		MH_Initialize();
 
 		BIND_FN(DNAEvidence, Start);
@@ -40,7 +135,7 @@ namespace Idxhook {
 		BIND_FN(PauseMenuController, Leave);
 		BIND_FN(RewardManager, Awake);
 		BIND_FN(SceneManager, LoadScene);
-		BIND_FN(SceneManager, SceneLoaded);
+		BIND_FN(SceneManager, Internal_SceneLoaded);
 		BIND_FN(FuseBox, Use);
 		BIND_FN(FuseBox, TurnOff);
 		BIND_FN(GUIUtility, CheckOnGUI);
@@ -61,7 +156,7 @@ namespace Idxhook {
 	{
 	}
 
-	void Cheat::Hooks::DNAEvidence::Start(void* This, MethodInfo* Info)
+	void Cheat::Hooks::DNAEvidence::Start(void* This, void* Info)
 	{
 		Original::DNAEvidence::Start(This, Info);
 
@@ -69,7 +164,7 @@ namespace Idxhook {
 			GameState::Pointers::DNAEvidence = This;
 	}
 
-	void Cheat::Hooks::GhostAI::Start(void* This, MethodInfo* Info)
+	void Cheat::Hooks::GhostAI::Start(void* This, void* Info)
 	{
 		Original::GhostAI::Start(This, Info);
 
@@ -77,7 +172,7 @@ namespace Idxhook {
 			GameState::Pointers::GhostAI = This;
 	}
 
-	void Cheat::Hooks::LevelController::Start(void* This, MethodInfo* Info)
+	void Cheat::Hooks::LevelController::Start(void* This, void* Info)
 	{
 		Original::LevelController::Start(This, Info);
 
@@ -85,33 +180,33 @@ namespace Idxhook {
 			GameState::Pointers::LevelController = This;
 	}
 
-	void Cheat::Hooks::GameController::Exit(void* This, MethodInfo* Info)
+	void Cheat::Hooks::GameController::Exit(void* This, void* Info)
 	{
 		GameState::Pointers::ResetPointers();
 		Original::GameController::Exit(This, Info);
 	}
 
-	void Cheat::Hooks::PauseMenuController::Leave(void* This, MethodInfo* Info)
+	void Cheat::Hooks::PauseMenuController::Leave(void* This, void* Info)
 	{
 		GameState::Pointers::ResetPointers();
 		Original::PauseMenuController::Leave(This, Info);
 	}
 
-	void Cheat::Hooks::RewardManager::Awake(void* This, MethodInfo* Info)
+	void Cheat::Hooks::RewardManager::Awake(void* This, void* Info)
 	{
 		GameState::Pointers::ResetPointers();
 		Original::RewardManager::Awake(This, Info);
 	}
 
-	void Cheat::Hooks::SceneManager::LoadScene(System::String* Name, MethodInfo* Info)
+	void Cheat::Hooks::SceneManager::LoadScene(System::String* Name, void* Info)
 	{
 		GameState::Pointers::ResetPointers();
 		Original::SceneManager::LoadScene(Name, Info);
 	}
 
-	void Cheat::Hooks::SceneManager::SceneLoaded(UnityEngine::Scene Scene, int Mode, MethodInfo* Info)
+	void Cheat::Hooks::SceneManager::Internal_SceneLoaded(UnityEngine::Scene Scene, int Mode, void* Info)
 	{
-		Original::SceneManager::SceneLoaded(Scene, Mode, Info);
+		Original::SceneManager::Internal_SceneLoaded(Scene, Mode, Info);
 
 		static const char* scenes[] =
 		{
@@ -123,19 +218,19 @@ namespace Idxhook {
 		std::cout << "Loaded Scene: " << scenes[Scene.GetBuildIndexInternal()] << "\n";
 	}
 
-	void Cheat::Hooks::FuseBox::Use(void* This, MethodInfo* Info)
+	void Cheat::Hooks::FuseBox::Use(void* This, void* Info)
 	{
 		if (!BlockFuseBox())
 			Original::FuseBox::Use(This, Info);
 	}
 
-	void Cheat::Hooks::FuseBox::TurnOff(void* This, bool Unknown, MethodInfo* Info)
+	void Cheat::Hooks::FuseBox::TurnOff(void* This, bool Unknown, void* Info)
 	{
 		if (!BlockFuseBox())
 			Original::FuseBox::TurnOff(This, Unknown, Info);
 	}
 
-	void Cheat::Hooks::GUIUtility::CheckOnGUI(MethodInfo* Info)
+	void Cheat::Hooks::GUIUtility::CheckOnGUI(void* Info)
 	{
 		Original::GUIUtility::CheckOnGUI(Info);
 
@@ -172,6 +267,7 @@ namespace Idxhook {
 
 		auto levelController = reinterpret_cast<Engine::LevelController*>(GameState::Pointers::LevelController);
 		auto evidenceController = Utils::GetTypeFromTypeInfo<Engine::EvidenceController>(Offsets::TypeInfo::EvidenceController);
+
 #if 0
 		Engine::GameController* CurrentGameController = Utils::GetTypeFromTypeInfo<Engine::GameController>(Offsets::TypeInfo::GameController);
 		Engine::EvidenceController* CurrentEvidenceController = Utils::GetTypeFromTypeInfo<Engine::EvidenceController>(Offsets::TypeInfo::EvidenceController);
@@ -404,7 +500,42 @@ namespace Idxhook {
 						? BoneParams{ true, first, second } : BoneParams{ false, {}, {} };
 				}
 
-				Bones() = bones;
+				GhostBones() = bones;
+			}
+
+			static UnityEngine::Vector3 extent{ 0.35f, 0.9f, 0.35f };
+			static UnityEngine::Vector3 vertex[2][4]{};
+			vertex[0][0] = { -extent.X, -extent.Y, -extent.Z };
+			vertex[0][1] = {  extent.X, -extent.Y, -extent.Z };
+			vertex[0][2] = {  extent.X,  extent.Y, -extent.Z };
+			vertex[0][3] = { -extent.X,  extent.Y, -extent.Z };
+			vertex[1][0] = { -extent.X, -extent.Y,  extent.Z };
+			vertex[1][1] = {  extent.X, -extent.Y,  extent.Z };
+			vertex[1][2] = {  extent.X,  extent.Y,  extent.Z };
+			vertex[1][3] = { -extent.X,  extent.Y,  extent.Z };
+
+			auto& ghostBox = GhostBox();
+			ghostBox.Valid = true;
+
+			for (size_t k = 0; k < 2; k++)
+			{
+				for (size_t i = 0; i < 4; i++)
+				{
+					UnityEngine::Vector3 addition{ 0.0f, extent.Y, 0.0f };
+					UnityEngine::Vector3 transform = ghost->GetTransform()->TransformDirection(vertex[k][i].Addition(addition));
+					//UnityEngine::Vector3 transform = ghostTransform->GetPosition();
+
+					UnityEngine::Vector2 screen{};
+					if (!ProjectWorldToScreen(cam, transform, screen, screenSize) ||
+						screen.X > screenSize.X ||
+						screen.Y > screenSize.Y)
+					{
+						ghostBox.Valid = false;
+						break;
+					}
+
+					ghostBox.Location[k][i] = screen;
+				}
 			}
 #if 0
 			HandleButton(Menu::State::GhostAppear, {
@@ -444,7 +575,7 @@ namespace Idxhook {
 #endif
 	}
 
-	void Cheat::Hooks::Player::Update(Engine::Player* Player, MethodInfo* Info)
+	void Cheat::Hooks::Player::Update(Engine::Player* Player, void* Info)
 	{
 		Original::Player::Update(Player, Info);
 

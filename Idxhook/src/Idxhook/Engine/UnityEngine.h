@@ -8,8 +8,8 @@ namespace Idxhook::UnityEngine {
 
     namespace Screen {
 
-        static std::int32_t GetWidth() { return Memory::CallFunction<std::int32_t>(Offsets::Methods::Screen::GetWidth); }
-        static std::int32_t GetHeight() { return Memory::CallFunction<std::int32_t>(Offsets::Methods::Screen::GetHeight); }
+        static std::int32_t GetWidth() { return Memory::CallFunction<std::int32_t>(Offsets::Methods::Screen::get_width); }
+        static std::int32_t GetHeight() { return Memory::CallFunction<std::int32_t>(Offsets::Methods::Screen::get_height); }
 
     }
 
@@ -20,7 +20,7 @@ namespace Idxhook::UnityEngine {
 
 		float Magnitude() { return Memory::CallFunction<float, Vector3>(Offsets::Methods::Vector3::Magnitude, *this); }
 		float Distance(const Vector3& other) { return Memory::CallFunction<float, Vector3, Vector3>(Offsets::Methods::Vector3::Distance, *this, other); }
-		Vector3 Addition(const Vector3& other) { return Memory::CallFunction<Vector3, Vector3, Vector3>(Offsets::Methods::Vector3::Addition, *this, other); }
+		Vector3 Addition(const Vector3& other) { return Memory::CallFunction<Vector3, Vector3, Vector3>(Offsets::Methods::Vector3::op_Addition, *this, other); }
     };
 
     class Vector2
@@ -32,36 +32,36 @@ namespace Idxhook::UnityEngine {
     class Transform
 	{
     public:
-        Vector3 GetPosition() { return Memory::CallFunction<Vector3, void*>(Offsets::Methods::Transform::GetPosition, this); }
-        void SetPosition(Vector3 Position) { return Memory::CallFunction<void, void*, Vector3>(Offsets::Methods::Transform::SetPosition, this, Position); }
+        Vector3 GetPosition() { return Memory::CallFunction<Vector3, void*>(Offsets::Methods::Transform::get_position, this); }
+        void SetPosition(Vector3 Position) { return Memory::CallFunction<void, void*, Vector3>(Offsets::Methods::Transform::set_position, this, Position); }
         Vector3 TransformDirection(Vector3 Direction) { return Memory::CallFunction<Vector3, void*, Vector3>(Offsets::Methods::Transform::TransformDirection, this, Direction); }
     };
 
     class Component
 	{
     public:
-        Transform* GetTransform() { return Memory::CallFunction<Transform*, void*>(Offsets::Methods::Component::GetTransform, this); }
+        Transform* GetTransform() { return Memory::CallFunction<Transform*, void*>(Offsets::Methods::Component::get_transform, this); }
     };
 
     class Camera : public Component
 	{
     public:
-        static Camera* GetMain() { return Memory::CallFunction<Camera*>(Offsets::Methods::Camera::GetMain); }
-		float GetFieldOfView() { return Memory::CallFunction<float, void*>(Offsets::Methods::Camera::GetFieldOfView, this); }
-        void SetFieldOfView(float Value) { return Memory::CallFunction<void, void*, float>(Offsets::Methods::Camera::SetFieldOfView, this, Value); }
+        static Camera* GetMain() { return Memory::CallFunction<Camera*>(Offsets::Methods::Camera::get_main); }
+		float GetFieldOfView() { return Memory::CallFunction<float, void*>(Offsets::Methods::Camera::get_fieldOfView, this); }
+        void SetFieldOfView(float Value) { return Memory::CallFunction<void, void*, float>(Offsets::Methods::Camera::set_fieldOfView, this, Value); }
         Vector3 WorldToScreenPoint(const Vector3& Position) { return Memory::CallFunction<Vector3, void*, Vector3>(Offsets::Methods::Camera::WorldToScreenPoint, this, Position); }
     };
 
     class Rigidbody
 	{
     public:
-        void SetMass(float Value) { return Memory::CallFunction<void, void*, float>(Offsets::Methods::Rigidbody::SetMass, this, Value); }
+        void SetMass(float Value) { return Memory::CallFunction<void, void*, float>(Offsets::Methods::Rigidbody::set_mass, this, Value); }
     };
 
     class Text
 	{
     public:
-        System::String* GetText() { return Memory::CallFunction<System::String*, void*>(Offsets::Methods::Text::GetText, this); }
+        System::String* GetText() { return Memory::CallFunction<System::String*, void*>(Offsets::Methods::Text::get_text, this); }
     };
 
     class Scene

@@ -27,6 +27,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 IncludeDir = {}
 IncludeDir["ImGui"] = "%{wks.location}/Idxhook/vendor/imgui"
 IncludeDir["minhook"] = "%{wks.location}/Idxhook/vendor/minhook/include"
+IncludeDir["json"] = "%{wks.location}/Idxhook/vendor/json"
 
 group "Core"
 	include "Idxhook"
