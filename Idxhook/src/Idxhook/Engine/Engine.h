@@ -80,9 +80,9 @@ namespace Idxhook::Engine {
 	{
 		union
 		{
-			Member(float, fl3, 0x48);
-			Member(float, fl4, 0x4C);
-			Member(float, fl5, 0x50);
+			Member(float, float3, 0x48);
+			Member(float, float4, 0x4C);
+			Member(float, float5, 0x50);
 		};
     };
 
@@ -173,6 +173,12 @@ namespace Idxhook::Engine {
         void InteractWithARandomDoor() { return Memory::CallFunction<void, void*>(Offsets::Methods::GhostActivity::InteractWithARandomDoor, this); }
     };
 
+	struct Renderer : public UnityEngine::Component
+	{
+		bool GetEnabled() { return Memory::CallFunction<bool, void*>(Offsets::Methods::Renderer::get_enabled, this); }
+		void SetEnabled(bool value) { return Memory::CallFunction<void, void*, bool>(Offsets::Methods::Renderer::set_enabled, this, value); }
+	};
+
 	struct GhostAI : public UnityEngine::Component
 	{
         union
@@ -180,6 +186,7 @@ namespace Idxhook::Engine {
             Member(UnityEngine::Animator*, Animator, 0x30);
             Member(GhostInfo*, Info, 0x38);
             Member(GhostActivity*, Activity, 0x58);
+			Member(System::Array<Renderer>*, RendererArray, 0x68);
             Member(bool, IsHunting, 0xA8);
         };
 

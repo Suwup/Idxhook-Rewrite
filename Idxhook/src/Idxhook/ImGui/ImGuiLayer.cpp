@@ -6,6 +6,7 @@
 #include "Idxhook/Engine/Other.h"
 
 #include <imgui_internal.h>
+#include <iostream>
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -55,7 +56,17 @@ namespace Idxhook {
 					ImGui::SetWindowPos({}, ImGuiCond_Always);
 					ImGui::SetWindowSize(*(const ImVec2*)&Cheat::ScreenSize(), ImGuiCond_Always);
 
-					const auto drawList = ImGui::GetOverlayDrawList();
+					const auto drawList = ImGui::GetBackgroundDrawList();
+
+					drawList->AddText(nullptr, 0.0f, { 10.0f, 10.0f }, ImGui::GetColorU32(IM_COL32_WHITE), "Idxhook [Rewrite]");
+
+					if (Cheat::Credits())
+					{
+						drawList->AddText(nullptr, 0.0f, { 10.0f, 50.0f }, ImGui::GetColorU32(IM_COL32_WHITE), "Developers:");
+						drawList->AddText(nullptr, 0.0f, { 10.0f, 90.0f }, ImGui::GetColorU32(IM_COL32_WHITE), "Suwup");
+						drawList->AddText(nullptr, 0.0f, { 10.0f, 110.0f }, ImGui::GetColorU32(IM_COL32_WHITE), "Galxiez");
+						drawList->AddText(nullptr, 0.0f, { 10.0f, 130.0f }, ImGui::GetColorU32(IM_COL32_WHITE), "Darkest Euphoria");
+					}
 
 					if (Cheat::GhostEnable())
 					{
@@ -78,6 +89,25 @@ namespace Idxhook {
 									drawList->AddLine(*(const ImVec2*)&box.Location[0][i], *(const ImVec2*)&box.Location[0][(i + 1) % 4], color, false);
 									drawList->AddLine(*(const ImVec2*)&box.Location[1][i], *(const ImVec2*)&box.Location[1][(i + 1) % 4], color, false);
 									drawList->AddLine(*(const ImVec2*)&box.Location[0][i], *(const ImVec2*)&box.Location[1][i], color, false);
+								}
+							}
+						}
+					}
+
+					if (Cheat::PlayersEnable())
+					{
+						if (Cheat::PlayersSkeletonEnable())
+						{
+							for (size_t i = 0; i < 4; i++)
+							{
+								auto& player = Cheat::PlayerBones()[i];
+								if (player.empty())
+									continue;
+
+								for (const auto& it : player)
+								{
+									if (!it.Valid) break;
+									drawList->AddLine(*(const ImVec2*)&it.A, *(const ImVec2*)&it.B, color);
 								}
 							}
 						}
@@ -108,7 +138,7 @@ namespace Idxhook {
 					float& fov = Cheat::FieldOfView();
 
 					ImGui::SetNextWindowSize({ 500.0f, 350.0f });
-					ImGui::Begin("Idxhook");
+					ImGui::Begin("Idxhook", (bool*)true, ImGuiWindowFlags_NoResize);
 					ImGui::BeginTabBar("TabBar", ImGuiTabBarFlags_NoTabListScrollingButtons);
 					{
 						if (ImGui::BeginTabItem("General"))
@@ -118,6 +148,11 @@ namespace Idxhook {
 
 							ImGui::Checkbox("xQc speed", &Cheat::xQcSpeed());
 							ImGui::SliderFloat("xQc speed multiplier", &Cheat::xQcSpeedMultiplier(), 0.1f, 2.0f, "%.2f");
+
+							ImGui::Spacing();
+
+							ImGui::Checkbox("Max stamina", &Cheat::MaxStamina());
+							ImGui::Checkbox("Max sanity", &Cheat::MaxSanity());
 
 							ImGui::Spacing();
 
@@ -145,25 +180,24 @@ namespace Idxhook {
 
 							ImGui::Checkbox("Skeleton", &Cheat::GhostSkeletonEnable());
 							ImGui::Checkbox("Box", &Cheat::GhostBoxEnable());
-							//ImGui::Checkbox("Render model", &Cheat::GhostRenderModel());
+							ImGui::Checkbox("Render model", &Cheat::GhostRenderModel());
 
 							ImGui::ColorEdit4("Color", (float*)&color);
 
 							ImGui::EndTabItem();
 						}
-#if 0
-						if (ImGui::BeginTabItem("Player"))
+
+						if (ImGui::BeginTabItem("Players"))
 						{
-							ImGui::Checkbox("Enable", &config->checks[6]);
+							ImGui::Checkbox("Enable", &Cheat::PlayersEnable());
 
-							ImGui::Checkbox("Skeleton", &config->checks[7]);
-							ImGui::Checkbox("Name", &config->checks[8]);
+							ImGui::Checkbox("Skeleton", &Cheat::PlayersSkeletonEnable());
+							ImGui::Checkbox("Name", &Cheat::PlayersNameEnable());
 
 							ImGui::ColorEdit4("Color", (float*)&color);
 
 							ImGui::EndTabItem();
 						}
-#endif
 					}
 					ImGui::EndTabBar();
 					ImGui::End();

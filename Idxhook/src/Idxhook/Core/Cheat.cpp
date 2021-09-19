@@ -45,6 +45,9 @@ namespace Idxhook {
 			OFFSET_METHOD(Screen::get_width, "UnityEngine.");
 			OFFSET_METHOD(Screen::get_height, "UnityEngine.");
 
+			OFFSET_METHOD(Renderer::get_enabled, "UnityEngine.");
+			OFFSET_METHOD(Renderer::set_enabled, "UnityEngine.");
+
 			OFFSET_METHOD(Camera::get_main, "UnityEngine.");
 			OFFSET_METHOD(Camera::get_fieldOfView, "UnityEngine.");
 			OFFSET_METHOD(Camera::set_fieldOfView, "UnityEngine.");
@@ -244,30 +247,43 @@ namespace Idxhook {
 		auto& screenSize = ScreenSize();
 		screenSize = { (float)UnityEngine::Screen::GetWidth(), (float)UnityEngine::Screen::GetHeight() };
 
-		static auto ProjectWorldToScreen = [](UnityEngine::Camera* cam, const UnityEngine::Vector3& loc, UnityEngine::Vector2& screen, UnityEngine::Vector2 size) -> bool
+		static auto ProjectWorldToScreen = [](UnityEngine::Camera* cam, const UnityEngine::Vector3& loc, UnityEngine::Vector2& screen, const UnityEngine::Vector2& size) -> bool
 		{
-			UnityEngine::Vector3 Point = cam->WorldToScreenPoint(loc);
+			UnityEngine::Vector3 point = cam->WorldToScreenPoint(loc);
 
-			if (Point.Z < 0.f)
+			if (point.Z < 0.0f)
 				return false;
 
-			UnityEngine::Vector2 screenLoc{ Point.X, size.Y - Point.Y };
+			UnityEngine::Vector2 screenLoc{ point.X, size.Y - point.Y };
 
-			if (screenLoc.X > 0.f && screenLoc.Y > 0.f) {
-				if (screenLoc.X < size.X && screenLoc.Y < size.Y)
-				{
-					screen.X = screenLoc.X;
-					screen.Y = screenLoc.Y;
-
-					return true;
-				}
+			if (screenLoc.X > 0.0f && screenLoc.Y > 0.0f &&
+				screenLoc.X < size.X && screenLoc.Y < size.Y)
+			{
+				screen = screenLoc;
+				return true;
 			}
 
 			return false;
 		};
 
+		static auto ChangeRenderState = [](bool value, System::Array<Engine::Renderer>* renderers)
+		{
+			for (uint64_t i = 0; i < renderers->MaxLength; i++)
+			{
+				if (!renderers->Values)
+					continue;
+
+				auto renderer = renderers->Values[i];
+				if (!renderer || renderer->GetEnabled())
+					continue;
+
+				renderer->SetEnabled(value);
+			}
+		};
+
 		auto levelController = reinterpret_cast<Engine::LevelController*>(GameState::Pointers::LevelController);
 		auto evidenceController = Utils::GetTypeFromTypeInfo<Engine::EvidenceController>(Offsets::TypeInfo::EvidenceController);
+		auto gameController = Utils::GetTypeFromTypeInfo<Engine::GameController>(Offsets::TypeInfo::GameController);
 
 #if 0
 		Engine::GameController* CurrentGameController = Utils::GetTypeFromTypeInfo<Engine::GameController>(Offsets::TypeInfo::GameController);
@@ -486,9 +502,26 @@ namespace Idxhook {
 			GameState::GhostData::WorldToScreen = WorldToScreen(MainCamera, GhostPosition, GameState::GhostData::Position, ScreenSizeVector);
 			GameState::GhostData::BonesWorldToScreen = true;
 #endif
+			if (ghost->RendererArray)
+			{
+				// TODO: Clean up this mess
+				bool& shouldRenderGhostModel = GhostShouldRenderModel();
+				bool& renderGhost = GhostRenderModel();
+				if (renderGhost)
+				{
+					shouldRenderGhostModel = renderGhost;
+					ChangeRenderState(renderGhost, ghost->RendererArray);
+				}
+				else if (shouldRenderGhostModel)
+				{
+					shouldRenderGhostModel = renderGhost;
+					ChangeRenderState(renderGhost, ghost->RendererArray);
+				}
+			}
+
 			if (GhostSkeletonEnable())
 			{
-				std::array<BoneParams, 16> bones{};
+				std::array<BoneParams, 18> bones{};
 				static const auto& bonesIDs = BoneIDArray();
 				for (const auto& it : bonesIDs)
 				{
@@ -527,18 +560,51 @@ namespace Idxhook {
 					for (size_t i = 0; i < 4; i++)
 					{
 						UnityEngine::Vector3 addition{ 0.0f, extent.Y, 0.0f };
-						UnityEngine::Vector3 transform = ghost->GetTransform()->TransformPoint(vertex[k][i].Addition(addition));
+						UnityEngine::Vector3 position{ vertex[k][i].Addition(addition) };
+						UnityEngine::Vector3 point = ghost->GetTransform()->TransformPoint(position);
 
 						UnityEngine::Vector2 screen{};
-						if (!ProjectWorldToScreen(cam, transform, screen, screenSize) ||
-							screen.X > screenSize.X ||
-							screen.Y > screenSize.Y)
+						if (!ProjectWorldToScreen(cam, point, screen, screenSize))
 						{
 							ghostBox.Valid = false;
 							break;
 						}
 
 						ghostBox.Location[k][i] = screen;
+					}
+				}
+			}
+
+			if (PlayersEnable())
+			{
+				auto playerList = gameController->PlayerList;
+
+				if (PlayersSkeletonEnable())
+				{
+					for (size_t i = 0; i < playerList->Size; i++)
+					{
+						auto playerData = playerList->Items->Values[i];
+						if (!playerData || playerData == gameController->MyPlayer)
+							continue;
+
+						auto player = playerData->RealPlayer;
+						if (!player)
+							continue;
+
+						std::array<BoneParams, 18> bones{};
+						static const auto& bonesIDs = BoneIDArray();
+						for (const auto& it : bonesIDs)
+						{
+							UnityEngine::Vector2 first{};
+							UnityEngine::Vector2 second{};
+							const size_t index = &it - &bonesIDs[0];
+
+							bones[index] = ProjectWorldToScreen(cam, player->Animator->GetBoneTransform(it.first)->GetPosition(), first, screenSize)
+								&& ProjectWorldToScreen(cam, player->Animator->GetBoneTransform(it.second)->GetPosition(), second, screenSize)
+								? BoneParams{ true, first, second } : BoneParams{ false, {}, {} };
+						}
+
+						PlayerBones()[i] = bones;
 					}
 				}
 			}
@@ -609,6 +675,15 @@ namespace Idxhook {
 				localPlayer->Animator->SetFloat(Marshal::PtrToStringAnsi("speed"), charController->GetVelocity().Magnitude());
 			}
 
+			if (MaxStamina())
+			{
+				localPlayer->Stamina->float3 = 0.0f;
+				localPlayer->Stamina->float4 = 3.0f;
+				localPlayer->Stamina->float5 = 0.448327f;
+			}
+
+			if (MaxSanity())
+				localPlayer->Sanity->Insanity = 0.0f;
 #if 0
 			if (Menu::State::Noclip)
 			{

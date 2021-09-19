@@ -52,14 +52,22 @@ namespace Idxhook {
 		static bool& BlockFuseBox() { return Get().IBlockFuseBox(); }
 		static float& FieldOfView() { return Get().IFieldOfView(); }
 		static bool& ItemEnable() { return Get().IItemEnable(); }
+		static bool& PlayersEnable() { return Get().IPlayersEnable(); }
+		static bool& PlayersSkeletonEnable() { return Get().IPlayersSkeletonEnable(); }
+		static bool& PlayersNameEnable() { return Get().IPlayersNameEnable(); }
 		static bool& GhostEnable() { return Get().IGhostEnable(); }
 		static bool& GhostBoxEnable() { return Get().IGhostBoxEnable(); }
 		static bool& GhostSkeletonEnable() { return Get().IGhostSkeletonEnable(); }
+		static bool& GhostRenderModel() { return Get().IGhostRenderModel(); }
+		static bool& GhostShouldRenderModel() { return Get().IGhostShouldRenderModel(); }
+		static bool& MaxStamina() { return Get().IMaxStamina(); }
+		static bool& MaxSanity() { return Get().IMaxSanity(); }
 		static UnityEngine::Vector2& ScreenSize() { return Get().IScreenSize(); }
 		static BoxParams& GhostBox() { return Get().IGhostBox(); }
-		static std::array<BoneParams, 16>& GhostBones() { return Get().IGhostBones(); }
+		static std::array<BoneParams, 18>& GhostBones() { return Get().IGhostBones(); }
+		static std::array<std::array<BoneParams, 18>, 4>& PlayerBones() { return Get().IPlayerBones(); }
 		static std::array<ItemParams, 15>& Items() { return Get().IItems(); }
-		static std::array<std::pair<BoneID, BoneID>, 16>& BoneIDArray() { return Get().IBoneIDArray(); }
+		static std::array<std::pair<BoneID, BoneID>, 18>& BoneIDArray() { return Get().IBoneIDArray(); }
 		static std::unordered_map<std::string, uintptr_t>& FunctionMap() { return Get().IFunctionMap(); }
 		static std::unordered_map<std::string, uintptr_t>& TypeInfoMap() { return Get().ITypeInfoMap(); }
 	private:
@@ -119,33 +127,49 @@ namespace Idxhook {
 		bool& IBlockFuseBox() { return m_BlockFuseBox; }
 		float& IFieldOfView() { return m_FieldOfView; }
 		bool& IItemEnable() { return m_ItemEnable; }
+		bool& IPlayersEnable() { return m_PlayersEnable; }
+		bool& IPlayersSkeletonEnable() { return m_PlayersSkeletonEnable; }
+		bool& IPlayersNameEnable() { return m_PlayersNameEnable; }
 		bool& IGhostEnable() { return m_GhostEnable; }
 		bool& IGhostBoxEnable() { return m_GhostBoxEnable; }
 		bool& IGhostSkeletonEnable() { return m_GhostSkeletonEnable; }
+		bool& IGhostRenderModel() { return m_GhostRenderModel; }
+		bool& IGhostShouldRenderModel() { return m_GhostShouldRenderModel; }
+		bool& IMaxStamina() { return m_MaxStamina; }
+		bool& IMaxSanity() { return m_MaxSanity; }
 		UnityEngine::Vector2& IScreenSize() { return m_ScreenSize; }
 		BoxParams& IGhostBox() { return m_GhostBox; }
-		std::array<BoneParams, 16>& IGhostBones() { return m_GhostBones; }
+		std::array<BoneParams, 18>& IGhostBones() { return m_GhostBones; }
+		std::array<std::array<BoneParams, 18>, 4>& IPlayerBones() { return m_PlayerBones; }
 		std::array<ItemParams, 15>& IItems() { return m_Items; }
-		std::array<std::pair<BoneID, BoneID>, 16>& IBoneIDArray() { return m_BoneIDArray; }
+		std::array<std::pair<BoneID, BoneID>, 18>& IBoneIDArray() { return m_BoneIDArray; }
 		std::unordered_map<std::string, uintptr_t>& IFunctionMap() { return m_FunctionMap; }
 		std::unordered_map<std::string, uintptr_t>& ITypeInfoMap() { return m_TypeInfoMap; }
 	private:
 		bool m_xQcSpeed = false;
-		float m_xQcSpeedMultiplier = 0.0f;
+		float m_xQcSpeedMultiplier = 1.0f;
 		bool m_Credits = true;
 		bool m_BlockFuseBox = false;
 		float m_FieldOfView = 0.0f;
 		bool m_ItemEnable = true;
+		bool m_PlayersEnable = true;
+		bool m_PlayersSkeletonEnable = true;
+		bool m_PlayersNameEnable = true;
 		bool m_GhostEnable = true;
 		bool m_GhostBoxEnable = true;
 		bool m_GhostSkeletonEnable = true;
+		bool m_GhostRenderModel = true;
+		bool m_GhostShouldRenderModel = true;
+		bool m_MaxStamina = true;
+		bool m_MaxSanity = true;
 
 		UnityEngine::Vector2 m_ScreenSize{};
 
 		BoxParams m_GhostBox{};
-		std::array<BoneParams, 16> m_GhostBones{};
+		std::array<std::array<BoneParams, 18>, 4> m_PlayerBones{};
+		std::array<BoneParams, 18> m_GhostBones{};
 		std::array<ItemParams, 15> m_Items{};
-		std::array<std::pair<BoneID, BoneID>, 16> m_BoneIDArray =
+		std::array<std::pair<BoneID, BoneID>, 18> m_BoneIDArray =
 		{ {
 			{ BoneID::Head, BoneID::UpperChest },
 			{ BoneID::UpperChest, BoneID::Hips  },
@@ -155,6 +179,8 @@ namespace Idxhook {
 			{ BoneID::RightUpperLeg, BoneID::RightLowerLeg },
 			{ BoneID::LeftLowerLeg, BoneID::LeftFoot },
 			{ BoneID::RightLowerLeg, BoneID::RightFoot },
+			{ BoneID::LeftFoot, BoneID::LeftToes },
+			{ BoneID::RightFoot, BoneID::RightToes },
 			{ BoneID::UpperChest, BoneID::LeftShoulder },
 			{ BoneID::UpperChest, BoneID::RightShoulder },
 			{ BoneID::LeftShoulder, BoneID::LeftUpperArm },

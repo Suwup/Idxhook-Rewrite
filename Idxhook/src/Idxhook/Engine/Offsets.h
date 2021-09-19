@@ -11,6 +11,13 @@ namespace Idxhook::Offsets {
 
         }
 
+		namespace Renderer {
+
+			inline uintptr_t get_enabled = 0;
+			inline uintptr_t set_enabled = 0;
+
+		}
+
         namespace Camera {
 
             inline uintptr_t get_main = 0;
