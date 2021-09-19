@@ -27,6 +27,7 @@ namespace Idxhook::Offsets {
 			inline uintptr_t get_position = 0;
 			inline uintptr_t set_position = 0;
 			inline uintptr_t TransformDirection = 0;
+			inline uintptr_t TransformPoint = 0;
 
         }
 

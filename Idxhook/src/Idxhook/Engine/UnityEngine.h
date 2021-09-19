@@ -35,6 +35,7 @@ namespace Idxhook::UnityEngine {
         Vector3 GetPosition() { return Memory::CallFunction<Vector3, void*>(Offsets::Methods::Transform::get_position, this); }
         void SetPosition(Vector3 Position) { return Memory::CallFunction<void, void*, Vector3>(Offsets::Methods::Transform::set_position, this, Position); }
         Vector3 TransformDirection(Vector3 Direction) { return Memory::CallFunction<Vector3, void*, Vector3>(Offsets::Methods::Transform::TransformDirection, this, Direction); }
+        Vector3 TransformPoint(Vector3 Position) { return Memory::CallFunction<Vector3, void*, Vector3>(Offsets::Methods::Transform::TransformPoint, this, Position); }
     };
 
     class Component

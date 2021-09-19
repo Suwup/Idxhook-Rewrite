@@ -45,13 +45,6 @@ namespace Idxhook {
 		{
 			UnityEngine::Vector2 Location[2][4]{};
 		};
-	private:
-		enum class EBox : int32_t
-		{
-			ENone,
-			E2DBoxes,
-			E3DBoxes
-		};
 	public:
 		static bool& xQcSpeed() { return Get().IxQcSpeed(); }
 		static float& xQcSpeedMultiplier() { return Get().IxQcSpeedMultiplier(); }
@@ -60,9 +53,9 @@ namespace Idxhook {
 		static float& FieldOfView() { return Get().IFieldOfView(); }
 		static bool& ItemEnable() { return Get().IItemEnable(); }
 		static bool& GhostEnable() { return Get().IGhostEnable(); }
-		static bool& GhostSkeleton() { return Get().IGhostSkeleton(); }
+		static bool& GhostBoxEnable() { return Get().IGhostBoxEnable(); }
+		static bool& GhostSkeletonEnable() { return Get().IGhostSkeletonEnable(); }
 		static UnityEngine::Vector2& ScreenSize() { return Get().IScreenSize(); }
-		static EBox& GhostBoxType() { return Get().IGhostBoxType(); }
 		static BoxParams& GhostBox() { return Get().IGhostBox(); }
 		static std::array<BoneParams, 16>& GhostBones() { return Get().IGhostBones(); }
 		static std::array<ItemParams, 15>& Items() { return Get().IItems(); }
@@ -127,9 +120,9 @@ namespace Idxhook {
 		float& IFieldOfView() { return m_FieldOfView; }
 		bool& IItemEnable() { return m_ItemEnable; }
 		bool& IGhostEnable() { return m_GhostEnable; }
-		bool& IGhostSkeleton() { return m_GhostSkeleton; }
+		bool& IGhostBoxEnable() { return m_GhostBoxEnable; }
+		bool& IGhostSkeletonEnable() { return m_GhostSkeletonEnable; }
 		UnityEngine::Vector2& IScreenSize() { return m_ScreenSize; }
-		EBox& IGhostBoxType() { return m_GhostBoxType; }
 		BoxParams& IGhostBox() { return m_GhostBox; }
 		std::array<BoneParams, 16>& IGhostBones() { return m_GhostBones; }
 		std::array<ItemParams, 15>& IItems() { return m_Items; }
@@ -144,11 +137,11 @@ namespace Idxhook {
 		float m_FieldOfView = 0.0f;
 		bool m_ItemEnable = true;
 		bool m_GhostEnable = true;
-		bool m_GhostSkeleton = true;
+		bool m_GhostBoxEnable = true;
+		bool m_GhostSkeletonEnable = true;
 
 		UnityEngine::Vector2 m_ScreenSize{};
 
-		EBox m_GhostBoxType = EBox::ENone;
 		BoxParams m_GhostBox{};
 		std::array<BoneParams, 16> m_GhostBones{};
 		std::array<ItemParams, 15> m_Items{};

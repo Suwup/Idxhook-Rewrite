@@ -55,6 +55,7 @@ namespace Idxhook {
 			OFFSET_METHOD(Transform::get_position, "UnityEngine.");
 			OFFSET_METHOD(Transform::set_position, "UnityEngine.");
 			OFFSET_METHOD(Transform::TransformDirection, "UnityEngine.");
+			OFFSET_METHOD(Transform::TransformPoint, "UnityEngine.");
 
 			OFFSET_METHOD(Vector3::Distance, "UnityEngine.");
 			OFFSET_METHOD(Vector3::Magnitude, "UnityEngine.");
@@ -485,7 +486,7 @@ namespace Idxhook {
 			GameState::GhostData::WorldToScreen = WorldToScreen(MainCamera, GhostPosition, GameState::GhostData::Position, ScreenSizeVector);
 			GameState::GhostData::BonesWorldToScreen = true;
 #endif
-			if (GhostSkeleton())
+			if (GhostSkeletonEnable())
 			{
 				std::array<BoneParams, 16> bones{};
 				static const auto& bonesIDs = BoneIDArray();
@@ -503,38 +504,42 @@ namespace Idxhook {
 				GhostBones() = bones;
 			}
 
-			static UnityEngine::Vector3 extent{ 0.35f, 0.9f, 0.35f };
-			static UnityEngine::Vector3 vertex[2][4]{};
-			vertex[0][0] = { -extent.X, -extent.Y, -extent.Z };
-			vertex[0][1] = {  extent.X, -extent.Y, -extent.Z };
-			vertex[0][2] = {  extent.X,  extent.Y, -extent.Z };
-			vertex[0][3] = { -extent.X,  extent.Y, -extent.Z };
-			vertex[1][0] = { -extent.X, -extent.Y,  extent.Z };
-			vertex[1][1] = {  extent.X, -extent.Y,  extent.Z };
-			vertex[1][2] = {  extent.X,  extent.Y,  extent.Z };
-			vertex[1][3] = { -extent.X,  extent.Y,  extent.Z };
-
-			auto& ghostBox = GhostBox();
-			ghostBox.Valid = true;
-
-			for (size_t k = 0; k < 2; k++)
+			if (GhostBoxEnable())
 			{
-				for (size_t i = 0; i < 4; i++)
+				static UnityEngine::Vector3 extent{ 0.35f, 0.9f, 0.35f };
+				static UnityEngine::Vector3 vertex[2][4]
 				{
-					UnityEngine::Vector3 addition{ 0.0f, extent.Y, 0.0f };
-					UnityEngine::Vector3 transform = ghost->GetTransform()->TransformDirection(vertex[k][i].Addition(addition));
-					//UnityEngine::Vector3 transform = ghostTransform->GetPosition();
+					-extent.X, -extent.Y, -extent.Z,
+					 extent.X, -extent.Y, -extent.Z,
+					 extent.X,  extent.Y, -extent.Z,
+					-extent.X,  extent.Y, -extent.Z,
+					-extent.X, -extent.Y,  extent.Z,
+					 extent.X, -extent.Y,  extent.Z,
+					 extent.X,  extent.Y,  extent.Z,
+					-extent.X,  extent.Y,  extent.Z
+				};
 
-					UnityEngine::Vector2 screen{};
-					if (!ProjectWorldToScreen(cam, transform, screen, screenSize) ||
-						screen.X > screenSize.X ||
-						screen.Y > screenSize.Y)
+				auto& ghostBox = GhostBox();
+				ghostBox.Valid = true;
+
+				for (size_t k = 0; k < 2; k++)
+				{
+					for (size_t i = 0; i < 4; i++)
 					{
-						ghostBox.Valid = false;
-						break;
-					}
+						UnityEngine::Vector3 addition{ 0.0f, extent.Y, 0.0f };
+						UnityEngine::Vector3 transform = ghost->GetTransform()->TransformPoint(vertex[k][i].Addition(addition));
 
-					ghostBox.Location[k][i] = screen;
+						UnityEngine::Vector2 screen{};
+						if (!ProjectWorldToScreen(cam, transform, screen, screenSize) ||
+							screen.X > screenSize.X ||
+							screen.Y > screenSize.Y)
+						{
+							ghostBox.Valid = false;
+							break;
+						}
+
+						ghostBox.Location[k][i] = screen;
+					}
 				}
 			}
 #if 0

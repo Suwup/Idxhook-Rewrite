@@ -59,7 +59,7 @@ namespace Idxhook {
 
 					if (Cheat::GhostEnable())
 					{
-						if (Cheat::GhostSkeleton())
+						if (Cheat::GhostSkeletonEnable())
 						{
 							for (const auto& it : Cheat::GhostBones())
 							{
@@ -68,14 +68,17 @@ namespace Idxhook {
 							}
 						}
 
-						auto& box = Cheat::GhostBox();
-						if (box.Valid)
+						if (Cheat::GhostBoxEnable())
 						{
-							for (auto i = 0; i < 4; i++)
+							auto& box = Cheat::GhostBox();
+							if (box.Valid)
 							{
-								drawList->AddLine(*(const ImVec2*)&box.Location[0][i], *(const ImVec2*)&box.Location[0][(i + 1) % 4], color, false);
-								drawList->AddLine(*(const ImVec2*)&box.Location[1][i], *(const ImVec2*)&box.Location[1][(i + 1) % 4], color, false);
-								drawList->AddLine(*(const ImVec2*)&box.Location[0][i], *(const ImVec2*)&box.Location[1][i], color, false);
+								for (auto i = 0; i < 4; i++)
+								{
+									drawList->AddLine(*(const ImVec2*)&box.Location[0][i], *(const ImVec2*)&box.Location[0][(i + 1) % 4], color, false);
+									drawList->AddLine(*(const ImVec2*)&box.Location[1][i], *(const ImVec2*)&box.Location[1][(i + 1) % 4], color, false);
+									drawList->AddLine(*(const ImVec2*)&box.Location[0][i], *(const ImVec2*)&box.Location[1][i], color, false);
+								}
 							}
 						}
 					}
@@ -140,12 +143,10 @@ namespace Idxhook {
 						{
 							ImGui::Checkbox("Enable", &Cheat::GhostEnable());
 
-							ImGui::Checkbox("Skeleton", &Cheat::GhostSkeleton());
+							ImGui::Checkbox("Skeleton", &Cheat::GhostSkeletonEnable());
+							ImGui::Checkbox("Box", &Cheat::GhostBoxEnable());
 							//ImGui::Checkbox("Render model", &Cheat::GhostRenderModel());
 
-							static const char* boxType[] = { "None", "2DBox", "3DBox" };
-
-							ImGui::Combo("Box type", reinterpret_cast<int*>(&Cheat::GhostBoxType()), boxType, IM_ARRAYSIZE(boxType));
 							ImGui::ColorEdit4("Color", (float*)&color);
 
 							ImGui::EndTabItem();
