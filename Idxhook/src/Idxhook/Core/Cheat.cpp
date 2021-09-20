@@ -92,6 +92,7 @@ namespace Idxhook {
 
 			OFFSET_METHOD(GhostAI::Appear);
 			OFFSET_METHOD(GhostAI::RandomEvent);
+			OFFSET_METHOD(GhostAI::ChangeState);
 
 			OFFSET_METHOD(GhostActivity::Interact);
 			OFFSET_METHOD(GhostActivity::InteractWithARandomDoor);
@@ -578,19 +579,18 @@ namespace Idxhook {
 			if (PlayersEnable())
 			{
 				auto playerList = gameController->PlayerList;
-
-				if (PlayersSkeletonEnable())
+				for (size_t i = 0; i < playerList->Size; i++)
 				{
-					for (size_t i = 0; i < playerList->Size; i++)
+					auto data = playerList->Items->Values[i];
+					if (!data || data == gameController->MyPlayer)
+						continue;
+
+					auto player = data->RealPlayer;
+					if (!player)
+						continue;
+
+					if (PlayersSkeletonEnable())
 					{
-						auto playerData = playerList->Items->Values[i];
-						if (!playerData || playerData == gameController->MyPlayer)
-							continue;
-
-						auto player = playerData->RealPlayer;
-						if (!player)
-							continue;
-
 						std::array<BoneParams, 18> bones{};
 						static const auto& bonesIDs = BoneIDArray();
 						for (const auto& it : bonesIDs)
@@ -605,6 +605,17 @@ namespace Idxhook {
 						}
 
 						PlayerBones()[i] = bones;
+					}
+
+					if (PlayersNameEnable())
+					{
+						UnityEngine::Vector2 screen{};
+						UnityEngine::Transform* transform = player->Animator->GetBoneTransform(UnityEngine::HumanBodyBones::Head);
+						bool valid = ProjectWorldToScreen(cam, transform->GetPosition(), screen, screenSize);
+
+						// Move the allocation to our new string instead of copying twice for no reason
+						std::string name = std::move(System::Utils::GetStringNative(data->PlayerName));
+						PlayerNames()[i] = { valid, screen, name.c_str() };
 					}
 				}
 			}

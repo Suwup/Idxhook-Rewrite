@@ -84,6 +84,7 @@ namespace Idxhook::Offsets {
 
 			inline uintptr_t Appear = 0;
 			inline uintptr_t RandomEvent = 0;
+			inline uintptr_t ChangeState = 0;
 
         }
 

@@ -57,9 +57,8 @@ namespace Idxhook::Engine {
 
 	namespace Photon::Pun {
 
-		enum class RpcTarget : int
+		enum class RpcTarget : int32_t
 		{
-			value__,
 			All = 0,
 			Others = 1,
 			MasterClient = 2,
@@ -97,7 +96,7 @@ namespace Idxhook::Engine {
         union
 		{
             Member(PhotonView*, Photon, 0x18);
-            Member(bool, IsHunted, 0x20);
+            Member(bool, IsDead, 0x20);
             Member(PlayerSanity*, Sanity, 0xB0);
             Member(PlayerStamina*, Stamina, 0xE0);
             Member(CharacterController*, CharController, 0xE8);
@@ -181,6 +180,35 @@ namespace Idxhook::Engine {
 
 	struct GhostAI : public UnityEngine::Component
 	{
+		enum class States : int32_t
+		{
+			idle = 0,
+			wander = 1,
+			hunting = 2,
+			favouriteRoom = 3,
+			light = 4,
+			door = 5,
+			throwing = 6,
+			fusebox = 7,
+			appear = 8,
+			doorKnock = 9,
+			windowKnock = 10,
+			carAlarm = 11,
+			radio = 12,
+			flicker = 13,
+			lockDoor = 14,
+			cctv = 15,
+			randomEvent = 16,
+			GhostAbility = 17,
+			killPlayer = 18,
+			sink = 19,
+			sound = 20,
+			painting = 21,
+			mannequin = 22,
+			teleportObject = 23,
+			animationObject = 24
+		};
+
         union
 		{
             Member(UnityEngine::Animator*, Animator, 0x30);
@@ -188,10 +216,12 @@ namespace Idxhook::Engine {
             Member(GhostActivity*, Activity, 0x58);
 			Member(System::Array<Renderer>*, RendererArray, 0x68);
             Member(bool, IsHunting, 0xA8);
+			Member(Player*, PlayerToKill, 0xC0);
         };
 
         void Appear() { return Memory::CallFunction<void, void*, bool>(Offsets::Methods::GhostAI::Appear, this, true); }
         void RandomEvent() { return Memory::CallFunction<void, void*>(Offsets::Methods::GhostAI::RandomEvent, this); }
+        void ChangeState(States state, struct PhotonObjectInteract* object, System::Array<struct PhotonObjectInteract>* objectArray) { return Memory::CallFunction<void, void*, States, struct PhotonObjectInteract*, System::Array<struct PhotonObjectInteract>*>(Offsets::Methods::GhostAI::ChangeState, this, state, object, objectArray); }
     };
 
 	struct FuseBox : public UnityEngine::Component

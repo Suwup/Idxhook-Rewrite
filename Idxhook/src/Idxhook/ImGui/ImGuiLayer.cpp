@@ -62,10 +62,11 @@ namespace Idxhook {
 
 					if (Cheat::Credits())
 					{
-						drawList->AddText(nullptr, 0.0f, { 10.0f, 50.0f }, ImGui::GetColorU32(IM_COL32_WHITE), "Developers:");
+						drawList->AddText(nullptr, 0.0f, { 10.0f, 50.0f }, ImGui::GetColorU32(IM_COL32_WHITE), "Credits:");
 						drawList->AddText(nullptr, 0.0f, { 10.0f, 90.0f }, ImGui::GetColorU32(IM_COL32_WHITE), "Suwup");
 						drawList->AddText(nullptr, 0.0f, { 10.0f, 110.0f }, ImGui::GetColorU32(IM_COL32_WHITE), "Galxiez");
 						drawList->AddText(nullptr, 0.0f, { 10.0f, 130.0f }, ImGui::GetColorU32(IM_COL32_WHITE), "Darkest Euphoria");
+						drawList->AddText(nullptr, 0.0f, { 10.0f, 150.0f }, ImGui::GetColorU32(IM_COL32_WHITE), "Lanylow");
 					}
 
 					if (Cheat::GhostEnable())
@@ -84,7 +85,7 @@ namespace Idxhook {
 							auto& box = Cheat::GhostBox();
 							if (box.Valid)
 							{
-								for (auto i = 0; i < 4; i++)
+								for (size_t i = 0; i < 4; i++)
 								{
 									drawList->AddLine(*(const ImVec2*)&box.Location[0][i], *(const ImVec2*)&box.Location[0][(i + 1) % 4], color, false);
 									drawList->AddLine(*(const ImVec2*)&box.Location[1][i], *(const ImVec2*)&box.Location[1][(i + 1) % 4], color, false);
@@ -98,7 +99,7 @@ namespace Idxhook {
 					{
 						if (Cheat::PlayersSkeletonEnable())
 						{
-							for (size_t i = 0; i < 4; i++)
+							for (size_t i = 0; i < Cheat::MaxPlayerCount(); i++)
 							{
 								auto& player = Cheat::PlayerBones()[i];
 								if (player.empty())
@@ -156,7 +157,7 @@ namespace Idxhook {
 
 							ImGui::Spacing();
 
-							if (ImGui::SliderFloat("Field Of View", &fov, 20.0f, 180.0f, "%.2f"))
+							if (ImGui::SliderFloat("Field Of View (retarded)", &fov, 20.0f, 180.0f, "%.2f"))
 							{
 								if (GameState::Pointers::CheckPointers())
 									UnityEngine::Camera::GetMain()->SetFieldOfView(fov);
@@ -197,6 +198,39 @@ namespace Idxhook {
 							ImGui::ColorEdit4("Color", (float*)&color);
 
 							ImGui::EndTabItem();
+						}
+
+						if (GameState::Pointers::CheckPointers())
+						{
+							if (ImGui::BeginTabItem("Player List"))
+							{
+								auto playerList = Utils::GetTypeFromTypeInfo<Engine::GameController>(Offsets::TypeInfo::GameController)->PlayerList;
+								for (size_t i = 0; i < playerList->Size; i++)
+								{
+									auto data = playerList->Items->Values[i];
+									auto player = data->RealPlayer;
+
+									// Move the allocation to our new string instead of copying twice for no reason
+									std::string playerName = std::move(System::Utils::GetStringNative(data->PlayerName));
+
+									ImGui::NewLine();
+									ImGui::Text((playerName + " -> " + (player->IsDead ? "Dead" : "Alive")).c_str());
+									ImGui::SameLine();
+
+									if (PhotonNetwork::IsMasterClient())
+									{
+										if (ImGui::Button(("Kill##" + playerName).c_str()))
+										{
+											Engine::GhostAI* ghost = reinterpret_cast<Engine::LevelController*>(GameState::Pointers::LevelController)->CurrentGhost;
+											ghost->PlayerToKill = player;
+											ghost->ChangeState(Engine::GhostAI::States::killPlayer, nullptr, nullptr);
+											player->IsDead = true;
+										}
+									}
+								}
+
+								ImGui::EndTabItem();
+							}
 						}
 					}
 					ImGui::EndTabBar();
