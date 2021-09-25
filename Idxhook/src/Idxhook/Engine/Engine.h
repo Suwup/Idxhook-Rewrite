@@ -221,7 +221,7 @@ namespace Idxhook::Engine {
 
         void Appear() { return Memory::CallFunction<void, void*, bool>(Offsets::Methods::GhostAI::Appear, this, true); }
         void RandomEvent() { return Memory::CallFunction<void, void*>(Offsets::Methods::GhostAI::RandomEvent, this); }
-        void ChangeState(States state, struct PhotonObjectInteract* object, System::Array<struct PhotonObjectInteract>* objectArray) { return Memory::CallFunction<void, void*, States, struct PhotonObjectInteract*, System::Array<struct PhotonObjectInteract>*>(Offsets::Methods::GhostAI::ChangeState, this, state, object, objectArray); }
+        void ChangeState(States state, PhotonObjectInteract* object, System::Array<PhotonObjectInteract>* objectArray) { return Memory::CallFunction<void, void*, States, PhotonObjectInteract*, System::Array<PhotonObjectInteract>*>(Offsets::Methods::GhostAI::ChangeState, this, state, object, objectArray); }
     };
 
 	struct FuseBox : public UnityEngine::Component

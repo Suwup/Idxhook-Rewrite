@@ -214,7 +214,7 @@ namespace Idxhook {
 									std::string playerName = std::move(System::Utils::GetStringNative(data->PlayerName));
 
 									ImGui::NewLine();
-									ImGui::Text((playerName + " -> " + (player->IsDead ? "Dead" : "Alive")).c_str());
+									ImGui::Text((playerName + " :: " + (player->IsDead ? "Dead" : "Alive")).c_str());
 									ImGui::SameLine();
 
 									if (PhotonNetwork::IsMasterClient())
@@ -224,7 +224,6 @@ namespace Idxhook {
 											Engine::GhostAI* ghost = reinterpret_cast<Engine::LevelController*>(GameState::Pointers::LevelController)->CurrentGhost;
 											ghost->PlayerToKill = player;
 											ghost->ChangeState(Engine::GhostAI::States::killPlayer, nullptr, nullptr);
-											player->IsDead = true;
 										}
 									}
 								}

@@ -271,9 +271,6 @@ namespace Idxhook {
 		{
 			for (uint64_t i = 0; i < renderers->MaxLength; i++)
 			{
-				if (!renderers->Values)
-					continue;
-
 				auto renderer = renderers->Values[i];
 				if (!renderer || renderer->GetEnabled())
 					continue;
