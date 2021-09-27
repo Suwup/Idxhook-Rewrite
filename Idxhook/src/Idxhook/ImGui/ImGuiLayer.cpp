@@ -136,10 +136,8 @@ namespace Idxhook {
 				{
 					if (!s_Instance->m_MenuOpen) break;
 
-					float& fov = Cheat::FieldOfView();
-
 					ImGui::SetNextWindowSize({ 500.0f, 350.0f });
-					ImGui::Begin("Idxhook", (bool*)true, ImGuiWindowFlags_NoResize);
+					ImGui::Begin("Idxhook", (bool*)true, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 					ImGui::BeginTabBar("TabBar", ImGuiTabBarFlags_NoTabListScrollingButtons);
 					{
 						if (ImGui::BeginTabItem("General"))
@@ -157,6 +155,7 @@ namespace Idxhook {
 
 							ImGui::Spacing();
 
+							float& fov = Cheat::FieldOfView();
 							if (ImGui::SliderFloat("Field Of View (retarded)", &fov, 20.0f, 180.0f, "%.2f"))
 							{
 								if (GameState::Pointers::CheckPointers())
@@ -187,7 +186,19 @@ namespace Idxhook {
 
 							ImGui::EndTabItem();
 						}
+#if 0
+						if (ImGui::BeginTabItem("Ghost Info"))
+						{
+							auto info = Application::Get().GetGhostInfo();
 
+							ImGui::Text("Age: %i", info->Age);
+							ImGui::Text("Gender: %s", info->Gender);
+							ImGui::Text("Name: %s", info->Name);
+							ImGui::Text("Type: %s", info->Type);
+
+							ImGui::EndTabItem();
+						}
+#endif
 						if (ImGui::BeginTabItem("Players"))
 						{
 							ImGui::Checkbox("Enable", &Cheat::PlayersEnable());

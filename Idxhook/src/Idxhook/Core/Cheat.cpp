@@ -187,24 +187,40 @@ namespace Idxhook {
 
 	void Cheat::Hooks::GameController::Exit(void* This, void* Info)
 	{
+		GhostBones() = {};
+		PlayerBones() = {};
+		GhostBox() = {};
+		PlayerNames() = {};
 		GameState::Pointers::ResetPointers();
 		Original::GameController::Exit(This, Info);
 	}
 
 	void Cheat::Hooks::PauseMenuController::Leave(void* This, void* Info)
 	{
+		GhostBones() = {};
+		PlayerBones() = {};
+		GhostBox() = {};
+		PlayerNames() = {};
 		GameState::Pointers::ResetPointers();
 		Original::PauseMenuController::Leave(This, Info);
 	}
 
 	void Cheat::Hooks::RewardManager::Awake(void* This, void* Info)
 	{
+		GhostBones() = {};
+		PlayerBones() = {};
+		GhostBox() = {};
+		PlayerNames() = {};
 		GameState::Pointers::ResetPointers();
 		Original::RewardManager::Awake(This, Info);
 	}
 
 	void Cheat::Hooks::SceneManager::LoadScene(System::String* Name, void* Info)
 	{
+		GhostBones() = {};
+		PlayerBones() = {};
+		GhostBox() = {};
+		PlayerNames() = {};
 		GameState::Pointers::ResetPointers();
 		Original::SceneManager::LoadScene(Name, Info);
 	}
@@ -267,15 +283,24 @@ namespace Idxhook {
 			return false;
 		};
 
-		static auto ChangeRenderState = [](bool value, System::Array<Engine::Renderer>* renderers)
+		static auto ChangeRenderState = [](bool value, bool shouldRender, System::Array<Engine::Renderer>* renderers)
 		{
-			for (uint64_t i = 0; i < renderers->MaxLength; i++)
+			if (value || shouldRender)
 			{
-				auto renderer = renderers->Values[i];
-				if (!renderer || renderer->GetEnabled())
-					continue;
+				if (!value && shouldRender)
+					shouldRender = false;
+				else
+				if (value && !shouldRender)
+					shouldRender = true;
 
-				renderer->SetEnabled(value);
+				for (uint64_t i = 0; i < renderers->MaxLength; i++)
+				{
+					auto renderer = renderers->Values[i];
+					if (!renderer)
+						continue;
+
+					renderer->SetEnabled(value);
+				}
 			}
 		};
 
@@ -450,14 +475,23 @@ namespace Idxhook {
 			static const char* evidenceTypes[] = { "EMF Spot", "Ouija Board", "Fingerprint", "Footstep", "Bone", "Ghost", "Dead Body", "Dirty Water" };
 			System::List<Engine::Evidence>* evidenceList = evidenceController->EvidenceList;
 
-			for (int i = 0; i < evidenceList->Size; i++)
+			for (int32_t i = 0; i < evidenceList->Size; i++)
 			{
 				Engine::Evidence* evidence = evidenceList->Items->Values[i];
-
 				auto loc = evidence->GetTransform()->GetPosition();
 
 				items[i].Valid = ProjectWorldToScreen(cam, loc, items[i].Location, screenSize);
 				items[i].Name = evidenceTypes[evidence->Type];
+			}
+
+			{
+				const int32_t index = evidenceList->Size;
+
+				Engine::FuseBox* fuseBox = levelController->CurrentFuseBox;
+				auto loc = fuseBox->GetTransform()->GetPosition();
+
+				items[index].Valid = ProjectWorldToScreen(cam, loc, items[index].Location, screenSize);
+				items[index].Name = "Fuse Box";
 			}
 		}
 
@@ -501,21 +535,7 @@ namespace Idxhook {
 			GameState::GhostData::BonesWorldToScreen = true;
 #endif
 			if (ghost->RendererArray)
-			{
-				// TODO: Clean up this mess
-				bool& shouldRenderGhostModel = GhostShouldRenderModel();
-				bool& renderGhost = GhostRenderModel();
-				if (renderGhost)
-				{
-					shouldRenderGhostModel = renderGhost;
-					ChangeRenderState(renderGhost, ghost->RendererArray);
-				}
-				else if (shouldRenderGhostModel)
-				{
-					shouldRenderGhostModel = renderGhost;
-					ChangeRenderState(renderGhost, ghost->RendererArray);
-				}
-			}
+				ChangeRenderState(GhostRenderModel(), GhostShouldRenderModel(), ghost->RendererArray);
 
 			if (GhostSkeletonEnable())
 			{
