@@ -1,135 +1,96 @@
-#pragma once
+/* Make sure that you DON'T use the preprocessor statement "pragma once" or our values will not be set from Cheat.cpp.
+Because of this, we need to be careful to not include this file in any other places than Base.h & Cheat.cpp */
 
-namespace Idxhook::Offsets {
+////////////////////////////////////
+/////// Methods ////////////////////
+////////////////////////////////////
 
-    namespace Methods {
+OFFSET_METHOD(Screen, get_width, "UnityEngine.");
+OFFSET_METHOD(Screen, get_height, "UnityEngine.");
 
-        namespace Screen {
+OFFSET_METHOD(Renderer, get_enabled, "UnityEngine.");
+OFFSET_METHOD(Renderer, set_enabled, "UnityEngine.");
 
-			inline uintptr_t get_width = 0;
-			inline uintptr_t get_height = 0;
+OFFSET_METHOD(Camera, get_main, "UnityEngine.");
+OFFSET_METHOD(Camera, get_fieldOfView, "UnityEngine.");
+OFFSET_METHOD(Camera, set_fieldOfView, "UnityEngine.");
+OFFSET_METHOD(Camera, WorldToScreenPoint, "UnityEngine.");
 
-        }
+OFFSET_METHOD(Component, get_transform, "UnityEngine.");
 
-		namespace Renderer {
+OFFSET_METHOD(Transform, get_position, "UnityEngine.");
+OFFSET_METHOD(Transform, set_position, "UnityEngine.");
+OFFSET_METHOD(Transform, TransformDirection, "UnityEngine.");
+OFFSET_METHOD(Transform, TransformPoint, "UnityEngine.");
 
-			inline uintptr_t get_enabled = 0;
-			inline uintptr_t set_enabled = 0;
+OFFSET_METHOD(Vector3, Distance, "UnityEngine.");
+OFFSET_METHOD(Vector3, Magnitude, "UnityEngine.");
+OFFSET_METHOD(Vector3, op_Addition, "UnityEngine.");
 
-		}
+OFFSET_METHOD(CharacterController, SimpleMove, "UnityEngine.");
+OFFSET_METHOD(CharacterController, get_velocity, "UnityEngine.");
 
-        namespace Camera {
+OFFSET_METHOD(Text, get_text, "UnityEngine.UI.");
 
-            inline uintptr_t get_main = 0;
-            inline uintptr_t get_fieldOfView = 0;
-            inline uintptr_t set_fieldOfView = 0;
-            inline uintptr_t WorldToScreenPoint = 0;
+OFFSET_METHOD(Scene, GetBuildIndexInternal, "UnityEngine.SceneManagement.");
 
-        }
+OFFSET_METHOD(Animator, GetFloat, "UnityEngine.");
+OFFSET_METHOD(Animator, SetFloat, "UnityEngine.");
+OFFSET_METHOD(Animator, GetBool, "UnityEngine.");
+OFFSET_METHOD(Animator, SetBool, "UnityEngine.");
+OFFSET_METHOD(Animator, GetInteger, "UnityEngine.");
+OFFSET_METHOD(Animator, SetInteger, "UnityEngine.");
+OFFSET_METHOD(Animator, GetBoneTransform, "UnityEngine.");
 
-        namespace Component { inline uintptr_t get_transform = 0; }
+OFFSET_METHOD(Rigidbody, set_mass, "UnityEngine.");
 
-        namespace Transform {
+OFFSET_METHOD(PhotonNetwork, set_NickName, "Photon.Pun.");
+OFFSET_METHOD(PhotonNetwork, get_IsMasterClient, "Photon.Pun.");
 
-			inline uintptr_t get_position = 0;
-			inline uintptr_t set_position = 0;
-			inline uintptr_t TransformDirection = 0;
-			inline uintptr_t TransformPoint = 0;
+OFFSET_METHOD(PhotonView, RPC, "Photon.Pun.");
 
-        }
+OFFSET_METHOD(Marshal, PtrToStringAnsi, "System.Runtime.InteropServices.");
 
-        namespace Vector3 {
+OFFSET_METHOD(Mission, Completed);
 
-			inline uintptr_t Distance = 0;
-			inline uintptr_t Magnitude = 0;
-			inline uintptr_t op_Addition = 0;
+OFFSET_METHOD(GhostAI, Appear);
+OFFSET_METHOD(GhostAI, RandomEvent);
+OFFSET_METHOD(GhostAI, ChangeState);
 
-        }
+OFFSET_METHOD(GhostActivity, Interact);
+OFFSET_METHOD(GhostActivity, InteractWithARandomDoor);
 
-		namespace CharacterController {
+////////////////////////////////////
+/////// TypeInfo ///////////////////
+////////////////////////////////////
 
-			inline uintptr_t SimpleMove = 0;
-			inline uintptr_t get_velocity = 0;
+OFFSET_TYPE_INFO(GameController);
+OFFSET_TYPE_INFO(EvidenceController);
+OFFSET_TYPE_INFO(MissionManager);
+OFFSET_TYPE_INFO(GhostController);
 
-		}
+////////////////////////////////////
+/////// Hooks //////////////////////
+////////////////////////////////////
 
-		namespace Text { inline uintptr_t get_text = 0; }
-		namespace Scene { inline uintptr_t GetBuildIndexInternal = 0; }
+OFFSET_HOOK(GUIUtility, CheckOnGUI, "UnityEngine.");
 
-		namespace Animator {
+OFFSET_HOOK(GhostAI, Start);
 
-			inline uintptr_t GetFloat = 0;
-			inline uintptr_t SetFloat = 0;
-			inline uintptr_t GetBool = 0;
-			inline uintptr_t SetBool = 0;
-			inline uintptr_t GetInteger = 0;
-			inline uintptr_t SetInteger = 0;
-			inline uintptr_t GetBoneTransform = 0;
+OFFSET_HOOK(DNAEvidence, Start);
 
-		}
+OFFSET_HOOK(LevelController, Start);
 
-		namespace Rigidbody { inline uintptr_t set_mass = 0; }
+OFFSET_HOOK(GameController, Exit);
 
-		namespace PhotonNetwork
-		{
-			inline uintptr_t set_NickName = 0;
-			inline uintptr_t get_IsMasterClient = 0;
-		}
+OFFSET_HOOK(PauseMenuController, Leave);
 
-		namespace PhotonView { inline uintptr_t RPC = 0; }
-		namespace Marshal { inline uintptr_t PtrToStringAnsi = 0; }
-		namespace Mission { inline uintptr_t Completed = 0; }
+OFFSET_HOOK(RewardManager, Awake);
 
-        namespace GhostAI {
+OFFSET_HOOK(Player, Update);
 
-			inline uintptr_t Appear = 0;
-			inline uintptr_t RandomEvent = 0;
-			inline uintptr_t ChangeState = 0;
+OFFSET_HOOK(SceneManager, LoadScene, "UnityEngine.SceneManagement.");
+OFFSET_HOOK(SceneManager, Internal_SceneLoaded, "UnityEngine.SceneManagement.");
 
-        }
-
-        namespace GhostActivity {
-
-			inline uintptr_t Interact = 0;
-			inline uintptr_t InteractWithARandomDoor = 0;
-
-        }
-    }
-
-    namespace TypeInfo {
-
-		inline uintptr_t GameController = 0;
-		inline uintptr_t EvidenceController = 0;
-		inline uintptr_t MissionManager = 0;
-		inline uintptr_t GhostController = 0;
-
-    }
-
-    namespace Hooks {
-
-        namespace GUIUtility { inline void* CheckOnGUI = nullptr; }
-        namespace GhostAI { inline void* Start = nullptr; }
-        namespace DNAEvidence { inline void* Start = nullptr; }
-        namespace LevelController { inline void* Start = nullptr; }
-        namespace GameController { inline void* Exit = nullptr; }
-        namespace PauseMenuController { inline void* Leave = nullptr; }
-        namespace RewardManager { inline void* Awake = nullptr; }
-        namespace Player { inline void* Update = nullptr; }
-
-        namespace SceneManager {
-
-            inline void* LoadScene = nullptr;
-            inline void* Internal_SceneLoaded = nullptr;
-
-        }
-
-        namespace FuseBox {
-
-			inline void* TurnOff = nullptr;
-            inline void* Use = nullptr;
-
-        }
-
-    }
-
-}
+OFFSET_HOOK(FuseBox, TurnOff);
+OFFSET_HOOK(FuseBox, Use);

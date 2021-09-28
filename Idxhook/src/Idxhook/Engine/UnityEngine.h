@@ -1,7 +1,6 @@
 #pragma once
 
 #include "System.h"
-#include "Offsets.h"
 #include "Utils.h"
 
 namespace Idxhook::UnityEngine {

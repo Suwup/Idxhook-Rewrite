@@ -1,7 +1,6 @@
 #include "ihpch.h"
 
 #include "Idxhook/Core/Cheat.h"	
-#include "Idxhook/Engine/Offsets.h"	
 
 #include <thread>
 #include <iostream>

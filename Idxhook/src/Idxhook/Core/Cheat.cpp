@@ -5,7 +5,6 @@
 #include "Idxhook/ImGui/ImGuiLayer.h"
 
 #include "Idxhook/Engine/GameState.h"
-#include "Idxhook/Engine/Offsets.h"
 #include "Idxhook/Engine/System.h"
 #include "Idxhook/Engine/Other.h"
 
@@ -19,9 +18,9 @@ namespace Idxhook {
 #define BIND_FN(loc, fn) BIND_FN_IMPL(#loc"::"#fn, Offsets::Hooks::loc::fn, reinterpret_cast<void*>(&Hooks::loc::fn), reinterpret_cast<void**>(&Original::loc::fn))
 
 #define LOG_OFFSET(name, offset) std::cout << name << " -> 0x" << std::hex << offset << "\n"
-#define OFFSET_METHOD(name, ...) { auto found = functionMap.find(__VA_ARGS__#name); LOG_OFFSET(found->first, (Offsets::Methods:: ## name = Memory::GetRVA(found->second))); }
-#define OFFSET_TYPE_INFO(name) { auto found = typeInfoMap.find(#name); LOG_OFFSET(found->first, (Offsets::TypeInfo:: ## name = Memory::GetRVA(found->second))); }
-#define OFFSET_HOOK(name, ...) { auto found = functionMap.find(__VA_ARGS__#name); LOG_OFFSET(found->first, (Offsets::Hooks:: ## name = Memory::GetRVAPointer<void>(found->second))); }
+#define OFFSET_METHOD(namespaze, name, ...) { auto found = functionMap.find(__VA_ARGS__#namespaze"::"#name); LOG_OFFSET(found->first, (Offsets::Methods::##namespaze::name = Memory::GetRVA(found->second))); }
+#define OFFSET_TYPE_INFO(name) { auto found = typeInfoMap.find(#name); LOG_OFFSET(found->first, (Offsets::TypeInfo::##name = Memory::GetRVA(found->second))); }
+#define OFFSET_HOOK(namespaze, name, ...) { auto found = functionMap.find(__VA_ARGS__#namespaze"::"#name); LOG_OFFSET(found->first, (Offsets::Hooks::##namespaze::name = Memory::GetRVAPointer<void>(found->second))); }
 
 	Cheat* Cheat::s_Instance = nullptr;
 
@@ -40,96 +39,8 @@ namespace Idxhook {
 		auto& functionMap = FunctionMap();
 		auto& typeInfoMap = TypeInfoMap();
 
-		// Methods
-		{
-			OFFSET_METHOD(Screen::get_width, "UnityEngine.");
-			OFFSET_METHOD(Screen::get_height, "UnityEngine.");
-
-			OFFSET_METHOD(Renderer::get_enabled, "UnityEngine.");
-			OFFSET_METHOD(Renderer::set_enabled, "UnityEngine.");
-
-			OFFSET_METHOD(Camera::get_main, "UnityEngine.");
-			OFFSET_METHOD(Camera::get_fieldOfView, "UnityEngine.");
-			OFFSET_METHOD(Camera::set_fieldOfView, "UnityEngine.");
-			OFFSET_METHOD(Camera::WorldToScreenPoint, "UnityEngine.");
-
-			OFFSET_METHOD(Component::get_transform, "UnityEngine.");
-
-			OFFSET_METHOD(Transform::get_position, "UnityEngine.");
-			OFFSET_METHOD(Transform::set_position, "UnityEngine.");
-			OFFSET_METHOD(Transform::TransformDirection, "UnityEngine.");
-			OFFSET_METHOD(Transform::TransformPoint, "UnityEngine.");
-
-			OFFSET_METHOD(Vector3::Distance, "UnityEngine.");
-			OFFSET_METHOD(Vector3::Magnitude, "UnityEngine.");
-			OFFSET_METHOD(Vector3::op_Addition, "UnityEngine.");
-
-			OFFSET_METHOD(CharacterController::SimpleMove, "UnityEngine.");
-			OFFSET_METHOD(CharacterController::get_velocity, "UnityEngine.");
-
-			OFFSET_METHOD(Text::get_text, "UnityEngine.UI.");
-
-			OFFSET_METHOD(Scene::GetBuildIndexInternal, "UnityEngine.SceneManagement.");
-
-			OFFSET_METHOD(Animator::GetFloat, "UnityEngine.");
-			OFFSET_METHOD(Animator::SetFloat, "UnityEngine.");
-			OFFSET_METHOD(Animator::GetBool, "UnityEngine.");
-			OFFSET_METHOD(Animator::SetBool, "UnityEngine.");
-			OFFSET_METHOD(Animator::GetInteger, "UnityEngine.");
-			OFFSET_METHOD(Animator::SetInteger, "UnityEngine.");
-			OFFSET_METHOD(Animator::GetBoneTransform, "UnityEngine.");
-
-			OFFSET_METHOD(Rigidbody::set_mass, "UnityEngine.");
-
-			OFFSET_METHOD(PhotonNetwork::set_NickName, "Photon.Pun.");
-			OFFSET_METHOD(PhotonNetwork::get_IsMasterClient, "Photon.Pun.");
-
-			OFFSET_METHOD(PhotonView::RPC, "Photon.Pun.");
-
-			OFFSET_METHOD(Marshal::PtrToStringAnsi, "System.Runtime.InteropServices.");
-
-			OFFSET_METHOD(Mission::Completed);
-
-			OFFSET_METHOD(GhostAI::Appear);
-			OFFSET_METHOD(GhostAI::RandomEvent);
-			OFFSET_METHOD(GhostAI::ChangeState);
-
-			OFFSET_METHOD(GhostActivity::Interact);
-			OFFSET_METHOD(GhostActivity::InteractWithARandomDoor);
-		}
-
-		// Type info
-		{
-			OFFSET_TYPE_INFO(GameController);
-			OFFSET_TYPE_INFO(EvidenceController);
-			OFFSET_TYPE_INFO(MissionManager);
-			OFFSET_TYPE_INFO(GhostController);
-		}
-
-		// Hooked methods
-		{
-			OFFSET_HOOK(GUIUtility::CheckOnGUI, "UnityEngine.");
-
-			OFFSET_HOOK(GhostAI::Start);
-
-			OFFSET_HOOK(DNAEvidence::Start);
-
-			OFFSET_HOOK(LevelController::Start);
-
-			OFFSET_HOOK(GameController::Exit);
-
-			OFFSET_HOOK(PauseMenuController::Leave);
-
-			OFFSET_HOOK(RewardManager::Awake);
-
-			OFFSET_HOOK(Player::Update);
-
-			OFFSET_HOOK(SceneManager::LoadScene, "UnityEngine.SceneManagement.");
-			OFFSET_HOOK(SceneManager::Internal_SceneLoaded, "UnityEngine.SceneManagement.");
-
-			OFFSET_HOOK(FuseBox::TurnOff);
-			OFFSET_HOOK(FuseBox::Use);
-		}
+		// Set offsets from our macros
+		#include "Idxhook/Engine/Offsets.h"
 
 		MH_Initialize();
 
