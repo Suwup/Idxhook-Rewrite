@@ -99,9 +99,8 @@ namespace Idxhook {
 					{
 						if (Cheat::PlayersSkeletonEnable())
 						{
-							for (int32_t i = 0; i < Cheat::MaxArraySize(); i++)
+							for (const auto& player : Cheat::PlayerBones())
 							{
-								auto& player = Cheat::PlayerBones()[i];
 								if (player.empty())
 									continue;
 
