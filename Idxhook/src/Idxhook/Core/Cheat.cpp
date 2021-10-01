@@ -19,7 +19,8 @@ namespace Idxhook {
 #define BIND_FN(loc, fn) BIND_FN_IMPL(#loc"::"#fn, Offsets::Hooks::loc::fn, reinterpret_cast<void*>(&Hooks::loc::fn), reinterpret_cast<void**>(&Original::loc::fn))
 
 #define LOG_OFFSET(name, offset) std::cout << name << " -> 0x" << std::hex << offset << "\n"
-#define OFFSET_METHOD(namespaze, name, ...) { auto found = functionMap.find(__VA_ARGS__#namespaze"::"#name); LOG_OFFSET(found->first, (Offsets::Methods::##namespaze::name = Memory::GetRVA(found->second))); }
+#define OFFSET_METHOD(type, name, args, sig) type(*name)args = reinterpret_cast<type(*)args>(il2cpp->GetMethod##sig)
+//#define OFFSET_METHOD(namespaze, name, ...) { auto found = functionMap.find(__VA_ARGS__#namespaze"::"#name); LOG_OFFSET(found->first, (Offsets::Methods::##namespaze::name = Memory::GetRVA(found->second))); }
 #define OFFSET_TYPE_INFO(name) { auto found = typeInfoMap.find(#name); LOG_OFFSET(found->first, (Offsets::TypeInfo::##name = Memory::GetRVA(found->second))); }
 #define OFFSET_HOOK(namespaze, name, ...) { auto found = functionMap.find(__VA_ARGS__#namespaze"::"#name); LOG_OFFSET(found->first, (Offsets::Hooks::##namespaze::name = Memory::GetRVAPointer<void>(found->second))); }
 
@@ -34,18 +35,14 @@ namespace Idxhook {
 	{
 	}
 
-	int32_t(*fn)(void* info);
-
 	void Cheat::Run()
 	{
 		auto il2cpp = new Il2cpp();
 
-		const void* methodPtr = il2cpp->GetMethod("UnityEngine.CoreModule", "UnityEngine", "Screen", "get_height", 0);
-		std::cout << "methodPtr: 0x" << std::hex << methodPtr << std::endl;
+		OFFSET_METHOD(int32_t, CameraGetMain, (MethodInfo* info), ("UnityEngine.CoreModule", "UnityEngine", "Camera", "get_main", 0));
 
-		fn = reinterpret_cast<decltype(fn)>(methodPtr);
-		int32_t height = fn(nullptr);
-		std::cout << height << std::endl;
+		std::cout << std::hex << CameraGetMain << std::endl;
+		std::cout << CameraGetMain(nullptr) << std::endl;
 
 		return;
 
