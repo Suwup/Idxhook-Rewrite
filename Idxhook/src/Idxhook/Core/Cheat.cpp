@@ -7,6 +7,7 @@
 #include "Idxhook/Engine/GameState.h"
 #include "Idxhook/Engine/System.h"
 #include "Idxhook/Engine/Other.h"
+#include "Idxhook/Engine/Il2cpp.h"
 
 #include <minhook.h>
 #include <iostream>
@@ -33,14 +34,27 @@ namespace Idxhook {
 	{
 	}
 
+	int32_t(*fn)(void* info);
+
 	void Cheat::Run()
 	{
+		auto il2cpp = new Il2cpp();
+
+		const void* methodPtr = il2cpp->GetMethod("UnityEngine.CoreModule", "UnityEngine", "Screen", "get_height", 0);
+		std::cout << "methodPtr: 0x" << std::hex << methodPtr << std::endl;
+
+		fn = reinterpret_cast<decltype(fn)>(methodPtr);
+		int32_t height = fn(nullptr);
+		std::cout << height << std::endl;
+
+		return;
+
 		// Maps containing our offsets set on entry point
 		auto& functionMap = FunctionMap();
 		auto& typeInfoMap = TypeInfoMap();
 
 		// Set offsets from our macros
-		#include "Idxhook/Engine/Offsets.h"
+		//#include "Idxhook/Engine/Offsets.h"
 
 		MH_Initialize();
 
