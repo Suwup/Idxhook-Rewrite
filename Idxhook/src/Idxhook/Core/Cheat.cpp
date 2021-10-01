@@ -44,6 +44,14 @@ namespace Idxhook {
 		std::cout << std::hex << CameraGetMain << std::endl;
 		std::cout << CameraGetMain(nullptr) << std::endl;
 
+		auto gameController = uintptr_t(il2cpp->GetClass("Assembly-CSharp", nullptr, "GameController"));
+		auto gameControllerTypeInfo = Utils::GetTypeFromTypeInfo<Engine::GameController>(gameController);
+
+		// Move the allocation to our new string instead of copying twice for no reason
+		std::string name = std::move(System::Utils::GetStringNative(gameControllerTypeInfo->MyPlayer->PlayerName));
+
+		std::cout << "Player name: " << name << std::endl;
+
 		return;
 
 		// Maps containing our offsets set on entry point

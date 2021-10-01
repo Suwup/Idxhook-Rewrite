@@ -6,8 +6,8 @@
 
 namespace Idxhook {
 
-#define SET_METHOD(ret, name, ...) name = reinterpret_cast<decltype(name)>(GetProcAddress(m_Assembly, #name));
-#define DEF_METHOD(ret, name, ...) using def_##name = ret(*)__VA_ARGS__; \
+#define SET_METHOD(ret, name, args) name = reinterpret_cast<decltype(name)>(GetProcAddress(m_Assembly, #name));
+#define DEF_METHOD(ret, name, args) using def_##name = ret(*)args; \
 	def_##name name = nullptr;
 
 	class Il2cpp
@@ -27,6 +27,11 @@ namespace Idxhook {
 			il2cpp_thread_attach(il2cpp_domain_get());
 		}
 
+		static Il2CppClass* GetClass(const char* assm, const char* nms, const char* clazz)
+		{
+			return Get().IGetClass(assm, nms, clazz);
+		}
+
 		static Il2CppMethodPointer GetMethod(const char* assm, const char* nms, const char* clazz, const char* funcName, int argc)
 		{
 			return Get().IGetMethod(assm, nms, clazz, funcName, argc);
@@ -34,7 +39,7 @@ namespace Idxhook {
 
 		static Il2cpp& Get() { return *s_Instance; }
 	private:
-		Il2CppMethodPointer IGetMethod(const char* assm, const char* nms, const char* clazz, const char* funcName, int argc)
+		Il2CppClass* IGetClass(const char* assm, const char* nms, const char* clazz)
 		{
 			auto domain = il2cpp_domain_get();
 			std::cout << "domain: 0x" << std::hex << domain << std::endl;
@@ -44,7 +49,12 @@ namespace Idxhook {
 			std::cout << "assembly: 0x" << std::hex << assembly << std::endl;
 			if (!assembly) return nullptr;
 
-			auto klazz = il2cpp_class_from_name(assembly->image, nms, clazz);
+			return il2cpp_class_from_name(assembly->image, nms, clazz);
+		}
+
+		Il2CppMethodPointer IGetMethod(const char* assm, const char* nms, const char* clazz, const char* funcName, int argc)
+		{
+			auto klazz = IGetClass(assm, nms, clazz);
 			std::cout << "klazz: 0x" << std::hex << klazz << std::endl;
 			if (!klazz) return nullptr;
 
