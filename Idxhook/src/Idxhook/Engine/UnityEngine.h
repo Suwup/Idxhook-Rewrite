@@ -2,13 +2,14 @@
 
 #include "System.h"
 #include "Utils.h"
+#include "Il2cpp.h"
 
 namespace Idxhook::UnityEngine {
 
     namespace Screen {
 
-        static std::int32_t GetWidth() { return Memory::CallFunction<std::int32_t>(Offsets::Methods::Screen::get_width); }
-        static std::int32_t GetHeight() { return Memory::CallFunction<std::int32_t>(Offsets::Methods::Screen::get_height); }
+        static std::int32_t GetWidth() { CALL_METHOD(int32_t, (), (), ("UnityEngine.CoreModule", "UnityEngine", "Screen", "get_width", 0)); }
+        static std::int32_t GetHeight() { CALL_METHOD(int32_t, (), (), ("UnityEngine.CoreModule", "UnityEngine", "Screen", "get_height", 0)); }
 
     }
 
@@ -17,9 +18,9 @@ namespace Idxhook::UnityEngine {
     public:
         float X, Y, Z;
 
-		float Magnitude() { return Memory::CallFunction<float, Vector3>(Offsets::Methods::Vector3::Magnitude, *this); }
-		float Distance(const Vector3& other) { return Memory::CallFunction<float, Vector3, Vector3>(Offsets::Methods::Vector3::Distance, *this, other); }
-		Vector3 Addition(const Vector3& other) { return Memory::CallFunction<Vector3, Vector3, Vector3>(Offsets::Methods::Vector3::op_Addition, *this, other); }
+		float Magnitude() { CALL_METHOD(float, (Vector3), (*this), ("UnityEngine.CoreModule", "UnityEngine", "Vector3", "Magnitude", 1)); }
+		float Distance(const Vector3& other) { CALL_METHOD(float, (Vector3, Vector3), (*this, other), ("UnityEngine.CoreModule", "UnityEngine", "Vector3", "Distance", 2)); }
+		Vector3 Addition(const Vector3& other) { CALL_METHOD(Vector3, (Vector3, Vector3), (*this, other), ("UnityEngine.CoreModule", "UnityEngine", "Vector3", "op_Addition", 2)); }
     };
 
     class Vector2
@@ -31,46 +32,37 @@ namespace Idxhook::UnityEngine {
     class Transform
 	{
     public:
-        Vector3 GetPosition() { return Memory::CallFunction<Vector3, void*>(Offsets::Methods::Transform::get_position, this); }
-        void SetPosition(const Vector3& Position) { return Memory::CallFunction<void, void*, Vector3>(Offsets::Methods::Transform::set_position, this, Position); }
-        Vector3 TransformDirection(const Vector3& Direction) { return Memory::CallFunction<Vector3, void*, Vector3>(Offsets::Methods::Transform::TransformDirection, this, Direction); }
-        Vector3 TransformPoint(const Vector3& Position) { return Memory::CallFunction<Vector3, void*, Vector3>(Offsets::Methods::Transform::TransformPoint, this, Position); }
+        Vector3 GetPosition() { CALL_METHOD(Vector3, (void*), (this), ("UnityEngine.CoreModule", "UnityEngine", "Transform", "get_position", 0)); }
+        void SetPosition(const Vector3& Position) { CALL_METHOD(void, (void*, Vector3), (this, Position), ("UnityEngine.CoreModule", "UnityEngine", "Transform", "set_position", 1)); }
+        Vector3 TransformDirection(const Vector3& Direction) { CALL_METHOD(Vector3, (void*, Vector3), (this, Direction), ("UnityEngine.CoreModule", "UnityEngine", "Transform", "TransformDirection", 1)); }
+        Vector3 TransformPoint(const Vector3& Position) { CALL_METHOD(Vector3, (void*, Vector3), (this, Position), ("UnityEngine.CoreModule", "UnityEngine", "Transform", "TransformPoint", 1)); }
     };
 
     class Component
 	{
     public:
-        Transform* GetTransform() { return Memory::CallFunction<Transform*, void*>(Offsets::Methods::Component::get_transform, this); }
+        Transform* GetTransform() { CALL_METHOD(Transform*, (void*), (this), ("UnityEngine.CoreModule", "UnityEngine", "Component", "get_transform", 0)); }
     };
 
     class Camera : public Component
 	{
     public:
-        static Camera* GetMain() { return Memory::CallFunction<Camera*>(Offsets::Methods::Camera::get_main); }
-		float GetFieldOfView() { return Memory::CallFunction<float, void*>(Offsets::Methods::Camera::get_fieldOfView, this); }
-        void SetFieldOfView(float Value) { return Memory::CallFunction<void, void*, float>(Offsets::Methods::Camera::set_fieldOfView, this, Value); }
-        Vector3 WorldToScreenPoint(const Vector3& Position) { return Memory::CallFunction<Vector3, void*, Vector3>(Offsets::Methods::Camera::WorldToScreenPoint, this, Position); }
+        static Camera* GetMain() { CALL_METHOD(Camera*, (), (), ("UnityEngine.CoreModule", "UnityEngine", "Camera", "get_main", 0)); }
+		float GetFieldOfView() { CALL_METHOD(float, (void*), (this), ("UnityEngine.CoreModule", "UnityEngine", "Camera", "get_fieldOfView", 0)); }
+        void SetFieldOfView(float Value) { CALL_METHOD(void, (void*, float), (this, Value), ("UnityEngine.CoreModule", "UnityEngine", "Camera", "set_fieldOfView", 1)); }
+        Vector3 WorldToScreenPoint(const Vector3& Position) { CALL_METHOD(Vector3, (void*, Vector3), (this, Position), ("UnityEngine.CoreModule", "UnityEngine", "Camera", "WorldToScreenPoint", 1)); }
     };
 
     class Rigidbody
 	{
     public:
-        void SetMass(float Value) { return Memory::CallFunction<void, void*, float>(Offsets::Methods::Rigidbody::set_mass, this, Value); }
+        void SetMass(float Value) { CALL_METHOD(void, (void*, float), (this, Value), ("UnityEngine.CoreModule", "UnityEngine", "Rigidbody", "set_mass", 1)); }
     };
 
     class Text
 	{
     public:
-        System::String* GetText() { return Memory::CallFunction<System::String*, void*>(Offsets::Methods::Text::get_text, this); }
-    };
-
-    class Scene
-	{
-    private:
-        int Handle;
-
-    public:
-        std::int32_t GetBuildIndexInternal() { return Memory::CallFunction<std::int32_t, std::int32_t>(Offsets::Methods::Scene::GetBuildIndexInternal, this->Handle); }
+        System::String* GetText() { CALL_METHOD(System::String*, (void*), (this), ("UnityEngine.CoreModule", "UnityEngine", "Text", "get_text", 0)); }
     };
 
     enum class HumanBodyBones : int32_t
@@ -136,12 +128,26 @@ namespace Idxhook::UnityEngine {
     class Animator
 	{
     public:
-		float GetFloat(const System::String* name) { return Memory::CallFunction<float, void*, const System::String*>(Offsets::Methods::Animator::GetFloat, this, name); }
-		void SetFloat(const System::String* name, float value) { return Memory::CallFunction<void, void*, const System::String*, float>(Offsets::Methods::Animator::SetFloat, this, name, value); }
-		bool GetBool(const System::String* name) { return Memory::CallFunction<bool, void*, const System::String*>(Offsets::Methods::Animator::GetBool, this, name); }
-		void SetBool(const System::String* name, bool value) { return Memory::CallFunction<void, void*, const System::String*, bool>(Offsets::Methods::Animator::SetBool, this, name, value); }
-		int32_t GetInteger(const System::String* name) { return Memory::CallFunction<int32_t, void*, const System::String*>(Offsets::Methods::Animator::GetInteger, this, name); }
-		void SetInteger(const System::String* name, int32_t value) { return Memory::CallFunction<void, void*, const System::String*, int32_t>(Offsets::Methods::Animator::SetInteger, this, name, value); }
-        Transform* GetBoneTransform(HumanBodyBones boneId) { return Memory::CallFunction<Transform*, void*, HumanBodyBones>(Offsets::Methods::Animator::GetBoneTransform, this, boneId); }
+		float GetFloat(const System::String* name) { CALL_METHOD(float, (void*, const System::String*), (this, name), ("UnityEngine.AnimationModule", "UnityEngine", "Animator", "GetFloat", 1)); }
+		void SetFloat(const System::String* name, float value) { CALL_METHOD(void, (void*, const System::String*, float), (this, name, value), ("UnityEngine.AnimationModule", "UnityEngine", "Animator", "SetFloat", 2)); }
+		bool GetBool(const System::String* name) { CALL_METHOD(bool, (void*, const System::String*), (this, name), ("UnityEngine.AnimationModule", "UnityEngine", "Animator", "GetBool", 1)); }
+		void SetBool(const System::String* name, bool value) { CALL_METHOD(void, (void*, const System::String*, bool), (this, name, value), ("UnityEngine.AnimationModule", "UnityEngine", "Animator", "SetBool", 2)); }
+		int32_t GetInteger(const System::String* name) { CALL_METHOD(int32_t, (void*, const System::String*), (this, name), ("UnityEngine.AnimationModule", "UnityEngine", "Animator", "GetInteger", 1)); }
+		void SetInteger(const System::String* name, int32_t value) { CALL_METHOD(void, (void*, const System::String*, int32_t), (this, name, value), ("UnityEngine.AnimationModule", "UnityEngine", "Animator", "SetInteger", 2)); }
+        Transform* GetBoneTransform(HumanBodyBones boneId) { CALL_METHOD(Transform*, (void*, HumanBodyBones), (this, boneId), ("UnityEngine.AnimationModule", "UnityEngine", "Animator", "GetBoneTransform", 1)); }
     };
+
+	class CharacterController
+	{
+	public:
+		bool SimpleMove(const Vector3& speed) { CALL_METHOD(bool, (void*, Vector3), (this, speed), ("UnityEngine.PhysicsModule", "UnityEngine", "CharacterController", "SimpleMove", 1)); }
+		Vector3 GetVelocity() { CALL_METHOD(Vector3, (void*), (this), ("UnityEngine.PhysicsModule", "UnityEngine", "CharacterController", "get_velocity", 0)); }
+	};
+
+	class Renderer : public Component
+	{
+	public:
+		bool GetEnabled() { CALL_METHOD(bool, (void*), (this), ("UnityEngine.CoreModule", "UnityEngine", "Renderer", "get_enabled", 0)); }
+		void SetEnabled(bool Value) { CALL_METHOD(void, (void*, bool), (this, Value), ("UnityEngine.CoreModule", "UnityEngine", "Renderer", "set_enabled", 1)); }
+	};
 }

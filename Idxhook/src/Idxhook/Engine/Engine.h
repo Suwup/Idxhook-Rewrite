@@ -72,7 +72,7 @@ namespace Idxhook::Engine {
 
 	struct PhotonView
 	{
-        void RPC(System::String* MethodName, Photon::Pun::RpcTarget Target, void* Arguments) { return Memory::CallFunction<void, void*, System::String*, Photon::Pun::RpcTarget, void*>(Offsets::Methods::PhotonView::RPC, this, MethodName, Target, Arguments); }
+        void RPC(System::String* MethodName, Photon::Pun::RpcTarget Target, void* Arguments) { CALL_METHOD(void, (void*, System::String*, Photon::Pun::RpcTarget, void*), (this, MethodName, Target, Arguments), ("PhotonUnityNetworking", "Photon.Pun", "PhotonView", "RPC", 3)); }
     };
 
 	struct PlayerStamina
@@ -85,12 +85,6 @@ namespace Idxhook::Engine {
 		};
     };
 
-	struct CharacterController
-	{
-		bool SimpleMove(const UnityEngine::Vector3& speed) { return Memory::CallFunction<bool, void*, UnityEngine::Vector3>(Offsets::Methods::CharacterController::SimpleMove, this, speed); }
-		UnityEngine::Vector3 GetVelocity() { return Memory::CallFunction<UnityEngine::Vector3, void*>(Offsets::Methods::CharacterController::get_velocity, this); }
-	};
-
 	struct Player : public UnityEngine::Component
 	{
         union
@@ -99,7 +93,7 @@ namespace Idxhook::Engine {
             Member(bool, IsDead, 0x20);
             Member(PlayerSanity*, Sanity, 0xB0);
             Member(PlayerStamina*, Stamina, 0xE0);
-            Member(CharacterController*, CharController, 0xE8);
+            Member(UnityEngine::CharacterController*, CharController, 0xE8);
             Member(FirstPersonController*, FirstPersonController, 0xF8);
             Member(PCPropGrab*, GrabProp, 0x100);
             Member(UnityEngine::Animator*, Animator, 0x140);
@@ -166,18 +160,6 @@ namespace Idxhook::Engine {
         };
     };
 
-	struct GhostActivity
-	{
-        void Interact() { return Memory::CallFunction<void, void*>(Offsets::Methods::GhostActivity::Interact, this); }
-        void InteractWithARandomDoor() { return Memory::CallFunction<void, void*>(Offsets::Methods::GhostActivity::InteractWithARandomDoor, this); }
-    };
-
-	struct Renderer : public UnityEngine::Component
-	{
-		bool GetEnabled() { return Memory::CallFunction<bool, void*>(Offsets::Methods::Renderer::get_enabled, this); }
-		void SetEnabled(bool value) { return Memory::CallFunction<void, void*, bool>(Offsets::Methods::Renderer::set_enabled, this, value); }
-	};
-
 	struct GhostAI : public UnityEngine::Component
 	{
 		enum class States : int32_t
@@ -213,15 +195,14 @@ namespace Idxhook::Engine {
 		{
             Member(UnityEngine::Animator*, Animator, 0x30);
             Member(GhostInfo*, Info, 0x38);
-            Member(GhostActivity*, Activity, 0x58);
-			Member(System::Array<Renderer>*, RendererArray, 0x68);
+			Member(System::Array<UnityEngine::Renderer>*, RendererArray, 0x68);
             Member(bool, IsHunting, 0xA8);
 			Member(Player*, PlayerToKill, 0xC0);
         };
 
-        void Appear() { return Memory::CallFunction<void, void*, bool>(Offsets::Methods::GhostAI::Appear, this, true); }
-        void RandomEvent() { return Memory::CallFunction<void, void*>(Offsets::Methods::GhostAI::RandomEvent, this); }
-        void ChangeState(States state, PhotonObjectInteract* object, System::Array<PhotonObjectInteract>* objectArray) { return Memory::CallFunction<void, void*, States, PhotonObjectInteract*, System::Array<PhotonObjectInteract>*>(Offsets::Methods::GhostAI::ChangeState, this, state, object, objectArray); }
+        void Appear() { CALL_METHOD(void, (void*, bool), (this, true), ("Assembly-CSharp", "", "GhostAI", "Appear", 1)); }
+        void RandomEvent() { CALL_METHOD(void, (void*), (this), ("Assembly-CSharp", "", "GhostAI", "RandomEvent", 0)); }
+        void ChangeState(States state, PhotonObjectInteract* object, System::Array<PhotonObjectInteract>* objectArray) { CALL_METHOD(void, (void*, States, PhotonObjectInteract*, System::Array<PhotonObjectInteract>*), (this, state, object, objectArray), ("Assembly-CSharp", "", "GhostAI", "ChangeState", 3)); }
     };
 
 	struct FuseBox : public UnityEngine::Component
@@ -277,7 +258,7 @@ namespace Idxhook::Engine {
             Member(UnityEngine::Text*, Label, 0x30);
         };
 
-        void Completed() { return Memory::CallFunction<void, void*>(Offsets::Methods::Mission::Completed, this); }
+        void Completed() { CALL_METHOD(void, (void*), (this), ("Assembly-CSharp", "", "Mission", "Completed", 0)); }
     };
 
 	struct MissionManager

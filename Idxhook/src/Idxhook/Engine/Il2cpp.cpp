@@ -37,8 +37,20 @@ namespace Idxhook {
 		return Get().IGetMethod(assm, nms, clazz, funcName, argc);
 	}
 
+	Il2CppMethodPointer Il2cpp::GetMethod(Il2CppClass* clazz, const char* funcName, int argc)
+	{
+		return Get().IGetMethod(clazz, funcName, argc);
+	}
+
+	Il2CppObject* Il2cpp::GetType(const char* assm, const char* nms, const char* clazz)
+	{
+		return Get().IGetType(assm, nms, clazz);
+	}
+
 	Il2CppClass* Il2cpp::IGetClass(const char* assm, const char* nms, const char* clazz)
 	{
+		std::cout << "Getting class: " << nms << "::" << clazz << " from assembly: " << assm << "\n\n";
+
 		auto domain = il2cpp_domain_get();
 		std::cout << "domain: 0x" << std::hex << domain << std::endl;
 		if (!domain) return nullptr;
@@ -56,7 +68,31 @@ namespace Idxhook {
 		std::cout << "klazz: 0x" << std::hex << klazz << std::endl;
 		if (!klazz) return nullptr;
 
+		std::cout << "Getting method: " << funcName << "\n\n";
+
 		return il2cpp_class_get_method_from_name(klazz, funcName, argc)->methodPointer;
+	}
+
+	Il2CppMethodPointer Il2cpp::IGetMethod(Il2CppClass* clazz, const char* funcName, int argc)
+	{
+		std::cout << "Getting method: " << funcName << "\n\n";
+
+		return il2cpp_class_get_method_from_name(clazz, funcName, argc)->methodPointer;
+	}
+
+	Il2CppObject* Il2cpp::IGetType(const char* assm, const char* nms, const char* clazz)
+	{
+		auto klazz = IGetClass(assm, nms, clazz);
+		std::cout << "klazz: 0x" << std::hex << klazz << std::endl;
+		if (!klazz) return nullptr;
+
+		std::cout << "Getting type from class: " << nms << "::" << clazz << "\n";
+
+		auto type = il2cpp_class_get_type(klazz);
+		std::cout << "type: 0x" << std::hex << type << std::endl;
+		if (!type) return nullptr;
+
+		return il2cpp_type_get_object(type);
 	}
 
 }
