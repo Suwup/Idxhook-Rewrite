@@ -3,13 +3,13 @@
 
 namespace Idxhook::PhotonNetwork {
 
-	static void SetNickname(System::String* Nickname) { return Memory::CallFunction<void, System::String*>(Offsets::Methods::PhotonNetwork::set_NickName, Nickname); }
-	static bool IsMasterClient() { return Memory::CallFunction<bool>(Offsets::Methods::PhotonNetwork::get_IsMasterClient); }
+	static void SetNickname(System::String* Nickname) { CALL_METHOD(void, (System::String*), (Nickname), ("PhotonUnityNetworking", "Photon.Pun", "PhotonNetwork", "set_NickName", 1)); }
+	static bool IsMasterClient() { CALL_METHOD(bool, (), (), ("PhotonUnityNetworking", "Photon.Pun", "PhotonNetwork", "get_IsMasterClient", 0)); }
 
 }
 
 namespace Idxhook::Marshal {
 
-	static System::String* PtrToStringAnsi(void* Pointer) { return Memory::CallFunction<System::String*, void*>(Offsets::Methods::Marshal::PtrToStringAnsi, Pointer); }
+	static System::String* PtrToStringAnsi(void* Pointer) { CALL_METHOD(System::String*, (void*), (Pointer), ("mscorlib", "System.Runtime.InteropServices", "Marshal", "PtrToStringAnsi", 1)); }
 
 }

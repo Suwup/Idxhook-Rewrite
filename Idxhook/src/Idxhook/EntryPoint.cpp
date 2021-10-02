@@ -14,6 +14,8 @@ static void Init()
 	FILE* f = nullptr;
 	freopen_s(&f, "CONOUT$", "w", stdout);
 
+	auto cheat = new Idxhook::Cheat();
+#if 0
 	const std::string fileName = "offsets.json";
 	if (!std::filesystem::exists(fileName))
 	{
@@ -23,8 +25,6 @@ static void Init()
 
 	std::ifstream stream(fileName);
 	nlohmann::json script = nlohmann::json::parse(stream);
-
-	auto cheat = new Idxhook::Cheat();
 
 	auto& functionMap = Idxhook::Cheat::FunctionMap();
 
@@ -47,7 +47,7 @@ static void Init()
 
 		typeInfoMap.emplace(signature, offset);
 	}
-	
+#endif
 	cheat->Run();
 }
 

@@ -7,6 +7,7 @@
 #include "Idxhook/Engine/GameState.h"
 #include "Idxhook/Engine/System.h"
 #include "Idxhook/Engine/Other.h"
+#include "Idxhook/Engine/Il2cpp.h"
 
 #include <minhook.h>
 #include <iostream>
@@ -17,10 +18,8 @@ namespace Idxhook {
 #define BIND_FN_IMPL(msg, target, detour, original) LOG_STATUS(msg, MH_CreateHook(target, detour, original))
 #define BIND_FN(loc, fn) BIND_FN_IMPL(#loc"::"#fn, Offsets::Hooks::loc::fn, reinterpret_cast<void*>(&Hooks::loc::fn), reinterpret_cast<void**>(&Original::loc::fn))
 
-#define LOG_OFFSET(name, offset) std::cout << name << " -> 0x" << std::hex << offset << "\n"
-#define OFFSET_METHOD(namespaze, name, ...) { auto found = functionMap.find(__VA_ARGS__#namespaze"::"#name); LOG_OFFSET(found->first, (Offsets::Methods::##namespaze::name = Memory::GetRVA(found->second))); }
-#define OFFSET_TYPE_INFO(name) { auto found = typeInfoMap.find(#name); LOG_OFFSET(found->first, (Offsets::TypeInfo::##name = Memory::GetRVA(found->second))); }
-#define OFFSET_HOOK(namespaze, name, ...) { auto found = functionMap.find(__VA_ARGS__#namespaze"::"#name); LOG_OFFSET(found->first, (Offsets::Hooks::##namespaze::name = Memory::GetRVAPointer<void>(found->second))); }
+#define SET_TYPE_INFO(name, sig) Offsets::TypeInfo::##name = il2cpp->GetClass##sig;
+#define SET_HOOK(namespaze, name, sig) Offsets::Hooks::##namespaze::name = il2cpp->GetMethod##sig;
 
 	Cheat* Cheat::s_Instance = nullptr;
 
@@ -35,12 +34,21 @@ namespace Idxhook {
 
 	void Cheat::Run()
 	{
-		// Maps containing our offsets set on entry point
-		auto& functionMap = FunctionMap();
-		auto& typeInfoMap = TypeInfoMap();
+		auto il2cpp = new Il2cpp();
 
-		// Set offsets from our macros
-		#include "Idxhook/Engine/Offsets.h"
+#if EXAMPLE
+		auto clazz = il2cpp->GetClass("Assembly-CSharp", "", "EvidenceController");
+		std::cout << "clazz: 0x" << std::hex << (void*)clazz << std::endl;
+		std::cout << "clazz->static_fields: 0x" << std::hex << (void*)clazz->static_fields << std::endl;
+
+		for (uint16_t i = 0; i < clazz->method_count; i++)
+			std::cout << "clazz->methods["<< i << "]->name: " << evidenceControllerClass->methods[i]->name << std::endl;
+#endif
+
+		USE_TYPE_INFO(SET_TYPE_INFO);
+		USE_HOOK(SET_HOOK);
+
+		std::cout << "Hooknig methods...\n";
 
 		MH_Initialize();
 
@@ -51,7 +59,6 @@ namespace Idxhook {
 		BIND_FN(PauseMenuController, Leave);
 		BIND_FN(RewardManager, Awake);
 		BIND_FN(SceneManager, LoadScene);
-		BIND_FN(SceneManager, Internal_SceneLoaded);
 		BIND_FN(FuseBox, Use);
 		BIND_FN(FuseBox, TurnOff);
 		BIND_FN(GUIUtility, CheckOnGUI);
@@ -66,6 +73,8 @@ namespace Idxhook {
 		BIND_FN_IMPL("DXGISwapChain::Present", DirectX11::PresentOriginal, hook, original);
 
 		MH_EnableHook(MH_ALL_HOOKS);
+
+		std::cout << "Hooked methods!\n\n";
 	}
 
 	void Cheat::Close()
@@ -136,20 +145,6 @@ namespace Idxhook {
 		Original::SceneManager::LoadScene(Name, Info);
 	}
 
-	void Cheat::Hooks::SceneManager::Internal_SceneLoaded(UnityEngine::Scene Scene, int Mode, void* Info)
-	{
-		Original::SceneManager::Internal_SceneLoaded(Scene, Mode, Info);
-
-		static const char* scenes[] =
-		{
-			"", "In Menu", "Tanglewood Street House", "Asylum", "Edgefield Street House",
-			"Ridgeview Road House", "Brownstone High School", "Bleasdale Farmhouse",
-			"Grafton Farmhouse", "Prison", "Willow Street House"
-		};
-
-		std::cout << "Loaded Scene: " << scenes[Scene.GetBuildIndexInternal()] << "\n";
-	}
-
 	void Cheat::Hooks::FuseBox::Use(void* This, void* Info)
 	{
 		if (!BlockFuseBox())
@@ -194,7 +189,7 @@ namespace Idxhook {
 			return false;
 		};
 
-		static auto ChangeRenderState = [](bool value, bool shouldRender, System::Array<Engine::Renderer>* renderers)
+		static auto ChangeRenderState = [](bool value, bool shouldRender, System::Array<UnityEngine::Renderer>* renderers)
 		{
 			if (value || shouldRender)
 			{
@@ -216,8 +211,8 @@ namespace Idxhook {
 		};
 
 		auto levelController = reinterpret_cast<Engine::LevelController*>(GameState::Pointers::LevelController);
-		auto evidenceController = Utils::GetTypeFromTypeInfo<Engine::EvidenceController>(Offsets::TypeInfo::EvidenceController);
-		auto gameController = Utils::GetTypeFromTypeInfo<Engine::GameController>(Offsets::TypeInfo::GameController);
+		auto evidenceController = *(Engine::EvidenceController**)Offsets::TypeInfo::EvidenceController->static_fields;
+		auto gameController = *(Engine::GameController**)Offsets::TypeInfo::GameController->static_fields;
 
 #if 0
 		Engine::GameController* CurrentGameController = Utils::GetTypeFromTypeInfo<Engine::GameController>(Offsets::TypeInfo::GameController);
@@ -591,7 +586,7 @@ namespace Idxhook {
 
 		if (!GameState::Pointers::CheckPointers()) return;
 
-		Engine::GameController* gameController = Utils::GetTypeFromTypeInfo<Engine::GameController>(Offsets::TypeInfo::GameController);
+		Engine::GameController* gameController = *(Engine::GameController**)Offsets::TypeInfo::GameController->static_fields;
 		Engine::Player* localPlayer = gameController->MyPlayer->RealPlayer;
 
 		if (localPlayer == Player)

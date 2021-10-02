@@ -88,12 +88,7 @@ namespace Idxhook {
 			struct GameController { static inline void Exit(void* This, void* Info); };
 			struct PauseMenuController { static inline void Leave(void* This, void* Info); };
 			struct RewardManager { static inline void Awake(void* This, void* Info); };
-
-			struct SceneManager
-			{
-				static inline void LoadScene(System::String* Name, void* Info);
-				static inline void Internal_SceneLoaded(UnityEngine::Scene Scene, int Mode, void* Info);
-			};
+			struct SceneManager { static inline void LoadScene(System::String* Name, void* Info); };
 
 			struct FuseBox
 			{
@@ -113,12 +108,7 @@ namespace Idxhook {
 			struct GameController { static inline std::add_pointer_t<void(void*, void*)> Exit = nullptr; };
 			struct PauseMenuController { static inline std::add_pointer_t<void(void*, void*)> Leave = nullptr; };
 			struct RewardManager { static inline std::add_pointer_t<void(void*, void*)> Awake = nullptr; };
-
-			struct SceneManager
-			{
-				static inline std::add_pointer_t<void(System::String*, void*)> LoadScene = nullptr;
-				static inline std::add_pointer_t<void(UnityEngine::Scene, int, void*)> Internal_SceneLoaded = nullptr;
-			};
+			struct SceneManager { static inline std::add_pointer_t<void(System::String*, void*)> LoadScene = nullptr; };
 
 			struct FuseBox
 			{

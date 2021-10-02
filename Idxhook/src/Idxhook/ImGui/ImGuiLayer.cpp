@@ -4,6 +4,7 @@
 #include "Idxhook/Core/Cheat.h"
 #include "Idxhook/Engine/GameState.h"
 #include "Idxhook/Engine/Other.h"
+#include "Idxhook/Engine/Il2cpp.h"
 
 #include <imgui_internal.h>
 #include <iostream>
@@ -214,7 +215,7 @@ namespace Idxhook {
 						{
 							if (ImGui::BeginTabItem("Player List"))
 							{
-								auto playerList = Utils::GetTypeFromTypeInfo<Engine::GameController>(Offsets::TypeInfo::GameController)->PlayerList;
+								auto playerList = (*(Engine::GameController**)Offsets::TypeInfo::GameController->static_fields)->PlayerList;
 								for (size_t i = 0; i < playerList->Size; i++)
 								{
 									auto data = playerList->Items->Values[i];
@@ -322,7 +323,7 @@ namespace Idxhook {
 	void ImGuiLayer::Begin()
 	{
 		// Disable the garbage collector when we render so it does not get interrupted
-		//il2cpp_gc_disable();
+		Il2cpp::Get().il2cpp_gc_disable();
 
 		// Set up new frame
 		ImGui_ImplDX11_NewFrame();
@@ -339,7 +340,7 @@ namespace Idxhook {
 		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
 		// Re-enable garbage collector
-		//il2cpp_gc_enable();
+		Il2cpp::Get().il2cpp_gc_enable();
 	}
 
 	void ImGuiLayer::SetDarkThemeColors()
