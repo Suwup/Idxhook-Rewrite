@@ -26,8 +26,7 @@ project "Idxhook"
 	{
         "src",
 		"%{IncludeDir.ImGui}",
-		"%{IncludeDir.minhook}",
-		"%{IncludeDir.json}"
+		"%{IncludeDir.minhook}"
 	}
 
 	links
