@@ -35,28 +35,20 @@ namespace Idxhook {
 	void Cheat::Run()
 	{
 		auto il2cpp = new Il2cpp();
-#if 0 
-		auto evidenceControllerClass = il2cpp->GetClass("Assembly-CSharp", "", "EvidenceController");
-		std::cout << "ptr: 0x" << std::hex << (void*)evidenceControllerClass << std::endl;
-		std::cout << "ptr->static_fields: 0x" << std::hex << (void*)evidenceControllerClass->static_fields << std::endl;
 
-		for (uint16_t i = 0; i < evidenceControllerClass->method_count; i++)
-			std::cout << "ptr->methods["<< i << "]->name: " << evidenceControllerClass->methods[i]->name << std::endl;
+#if EXAMPLE
+		auto clazz = il2cpp->GetClass("Assembly-CSharp", "", "EvidenceController");
+		std::cout << "clazz: 0x" << std::hex << (void*)clazz << std::endl;
+		std::cout << "clazz->static_fields: 0x" << std::hex << (void*)clazz->static_fields << std::endl;
 
-		auto evidenceController = *(Engine::EvidenceController**)evidenceControllerClass->static_fields;
-
-		static const char* evidenceTypes[] = { "EMF Spot", "Ouija Board", "Fingerprint", "Footstep", "Bone", "Ghost", "Dead Body", "Dirty Water" };
-		System::List<Engine::Evidence>* evidenceList = evidenceController->EvidenceList;
-
-		for (int32_t i = 0; i < evidenceList->Size; i++)
-		{
-			Engine::Evidence* evidence = evidenceList->Items->Values[i];
-			std::cout << "Evidence -> Type: " << evidenceTypes[evidence->Type] << std::endl;
-		}
+		for (uint16_t i = 0; i < clazz->method_count; i++)
+			std::cout << "clazz->methods["<< i << "]->name: " << evidenceControllerClass->methods[i]->name << std::endl;
 #endif
 
 		USE_TYPE_INFO(SET_TYPE_INFO);
 		USE_HOOK(SET_HOOK);
+
+		std::cout << "Hooknig methods...\n";
 
 		MH_Initialize();
 
@@ -81,6 +73,8 @@ namespace Idxhook {
 		BIND_FN_IMPL("DXGISwapChain::Present", DirectX11::PresentOriginal, hook, original);
 
 		MH_EnableHook(MH_ALL_HOOKS);
+
+		std::cout << "Hooked methods!\n\n";
 	}
 
 	void Cheat::Close()
