@@ -62,7 +62,7 @@ namespace Idxhook::UnityEngine {
     class Text
 	{
     public:
-        System::String* GetText() { CALL_METHOD(System::String*, (void*), (this), ("UnityEngine.CoreModule", "UnityEngine", "Text", "get_text", 0)); }
+        System::String* GetText() { CALL_METHOD(System::String*, (void*), (this), ("UnityEngine.UI", "UnityEngine.UI", "Text", "get_text", 0)); }
     };
 
     enum class HumanBodyBones : int32_t
@@ -149,5 +149,17 @@ namespace Idxhook::UnityEngine {
 	public:
 		bool GetEnabled() { CALL_METHOD(bool, (void*), (this), ("UnityEngine.CoreModule", "UnityEngine", "Renderer", "get_enabled", 0)); }
 		void SetEnabled(bool Value) { CALL_METHOD(void, (void*, bool), (this, Value), ("UnityEngine.CoreModule", "UnityEngine", "Renderer", "set_enabled", 1)); }
+	};
+	
+	class Cursor
+	{
+	public:
+		enum class LockMode : int32_t
+		{
+			None, Locked, Confined,
+		};
+	public:
+		static LockMode GetLockState() { CALL_METHOD(LockMode, (), (), ("UnityEngine.CoreModule", "UnityEngine", "Cursor", "get_lockState", 0)); }
+		static void SetLockState(LockMode Value) { CALL_METHOD(void, (LockMode), (Value), ("UnityEngine.CoreModule", "UnityEngine", "Cursor", "set_lockState", 1)); }
 	};
 }

@@ -70,6 +70,15 @@ namespace Idxhook {
 						drawList->AddText(nullptr, 0.0f, { 10.0f, 150.0f }, ImGui::GetColorU32(IM_COL32_WHITE), "Lanylow");
 					}
 
+					for (size_t i = 1; i <= Cheat::MissionSize(); i++)
+					{
+						const MissionParams& mission = Cheat::Missions()[i - 1];
+						if (!mission.Name.c_str())
+							break;
+
+						drawList->AddText(nullptr, 0.0f, { 10.0f, 250.0f + i * 20.0f }, ImGui::GetColorU32({ 1.0f, 1.0f, 0.0f, 1.0f }), mission.Name.c_str());
+					}
+
 					if (Cheat::GhostEnable())
 					{
 						if (Cheat::GhostSkeletonEnable())
@@ -134,10 +143,11 @@ namespace Idxhook {
 
 				do
 				{
-					if (!s_Instance->m_MenuOpen) break;
-
-					ImGui::SetNextWindowSize({ 500.0f, 350.0f });
-					ImGui::Begin("Idxhook", (bool*)true, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+					if (!s_Instance->m_MenuOpen)
+						break;
+					
+					ImGui::SetNextWindowSize({ 650.0f, 350.0f });
+					ImGui::Begin("Idxhook", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 					ImGui::BeginTabBar("TabBar", ImGuiTabBarFlags_NoTabListScrollingButtons);
 					{
 						if (ImGui::BeginTabItem("General"))
@@ -152,6 +162,7 @@ namespace Idxhook {
 
 							ImGui::Checkbox("Max stamina", &Cheat::MaxStamina());
 							ImGui::Checkbox("Max sanity", &Cheat::MaxSanity());
+							ImGui::Checkbox("Max lights", &Cheat::MaxLights());
 
 							ImGui::Spacing();
 
@@ -186,19 +197,44 @@ namespace Idxhook {
 
 							ImGui::EndTabItem();
 						}
-#if 0
+
 						if (ImGui::BeginTabItem("Ghost Info"))
 						{
-							auto info = Application::Get().GetGhostInfo();
+							const GhostInfoParams& info = Cheat::GhostInfo();
 
-							ImGui::Text("Age: %i", info->Age);
-							ImGui::Text("Gender: %s", info->Gender);
-							ImGui::Text("Name: %s", info->Name);
-							ImGui::Text("Type: %s", info->Type);
+							ImGui::Text("Name: %s", info.Name.c_str());
+							ImGui::Text("Age: %s", info.Age.c_str());
+							ImGui::Text("Room: %s", info.Room.c_str());
+							ImGui::Text("Type: %s", info.Type.c_str());
+							ImGui::Text("Evidence: %s", info.Evidence.c_str());
+							ImGui::Text("Gender: %s", info.Gender.c_str());
+							ImGui::Text("Hunting: %s", info.Hunting.c_str());
 
 							ImGui::EndTabItem();
 						}
-#endif
+
+						if (ImGui::BeginTabItem("Evidence"))
+						{
+							for (size_t i = 0; i < Cheat::MissionSize(); i++)
+							{
+								auto& mission = Cheat::Missions()[i];
+
+								ImGui::Text(mission.Name.c_str());
+
+								if (!mission.IsCompleted)
+								{
+									ImGui::SameLine();
+									if (ImGui::Button(std::string("Complete##" + std::to_string(i)).c_str()))
+										mission.ShouldComplete = true;
+								}
+							}
+
+							if (ImGui::Button("Complete all missions"))
+								Cheat::CompleteAllMissions() = true;
+
+							ImGui::EndTabItem();
+						}
+
 						if (ImGui::BeginTabItem("Players"))
 						{
 							ImGui::Checkbox("Enable", &Cheat::PlayersEnable());
@@ -225,12 +261,12 @@ namespace Idxhook {
 									std::string playerName = std::move(System::Utils::GetStringNative(data->PlayerName));
 
 									ImGui::NewLine();
-									ImGui::Text((playerName + " :: " + (player->IsDead ? "Dead" : "Alive")).c_str());
+									ImGui::Text(std::string(playerName + " :: " + (player->IsDead ? "Dead" : "Alive")).c_str());
 									ImGui::SameLine();
 
 									if (PhotonNetwork::IsMasterClient())
 									{
-										if (ImGui::Button(("Kill##" + playerName).c_str()))
+										if (ImGui::Button(std::string("Kill##" + playerName).c_str()))
 										{
 											Engine::GhostAI* ghost = reinterpret_cast<Engine::LevelController*>(GameState::Pointers::LevelController)->CurrentGhost;
 											ghost->PlayerToKill = player;
@@ -280,7 +316,7 @@ namespace Idxhook {
 		// Setting up ImGui
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
-		io.IniFilename = "BussySaka.ini";							// Since phasmophobia looks for "imgui.ini"
+		io.IniFilename = nullptr;									// Since phasmophobia looks for "imgui.ini"
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
 		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking

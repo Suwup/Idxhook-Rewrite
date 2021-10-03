@@ -32,6 +32,11 @@ namespace Idxhook {
 	{
 	}
 
+	static bool AcHook(Engine::Player* player)
+	{
+
+	}
+
 	void Cheat::Run()
 	{
 		auto il2cpp = new Il2cpp();
@@ -48,7 +53,7 @@ namespace Idxhook {
 		USE_TYPE_INFO(SET_TYPE_INFO);
 		USE_HOOK(SET_HOOK);
 
-		std::cout << "Hooknig methods...\n";
+		std::cout << "\nHooknig methods...\n\n";
 
 		MH_Initialize();
 
@@ -74,7 +79,7 @@ namespace Idxhook {
 
 		MH_EnableHook(MH_ALL_HOOKS);
 
-		std::cout << "Hooked methods!\n\n";
+		std::cout << "\nHooked methods!\n\n";
 	}
 
 	void Cheat::Close()
@@ -105,43 +110,39 @@ namespace Idxhook {
 			GameState::Pointers::LevelController = This;
 	}
 
+	static void Reset()
+	{
+		Cheat::GhostBones() = {};
+		Cheat::PlayerBones() = {};
+		Cheat::GhostBox() = {};
+		Cheat::PlayerNames() = {};
+		Cheat::GhostInfo() = {};
+		Cheat::Missions() = {};
+		Cheat::MissionSize() = 0;
+		GameState::Pointers::ResetPointers();
+	}
+
 	void Cheat::Hooks::GameController::Exit(void* This, void* Info)
 	{
-		GhostBones() = {};
-		PlayerBones() = {};
-		GhostBox() = {};
-		PlayerNames() = {};
-		GameState::Pointers::ResetPointers();
+		Reset();
 		Original::GameController::Exit(This, Info);
 	}
 
 	void Cheat::Hooks::PauseMenuController::Leave(void* This, void* Info)
 	{
-		GhostBones() = {};
-		PlayerBones() = {};
-		GhostBox() = {};
-		PlayerNames() = {};
-		GameState::Pointers::ResetPointers();
+		Reset();
 		Original::PauseMenuController::Leave(This, Info);
 	}
 
 	void Cheat::Hooks::RewardManager::Awake(void* This, void* Info)
 	{
-		GhostBones() = {};
-		PlayerBones() = {};
-		GhostBox() = {};
-		PlayerNames() = {};
-		GameState::Pointers::ResetPointers();
+		Reset();
 		Original::RewardManager::Awake(This, Info);
 	}
 
 	void Cheat::Hooks::SceneManager::LoadScene(System::String* Name, void* Info)
 	{
-		GhostBones() = {};
-		PlayerBones() = {};
-		GhostBox() = {};
-		PlayerNames() = {};
-		GameState::Pointers::ResetPointers();
+		Reset();
 		Original::SceneManager::LoadScene(Name, Info);
 	}
 
@@ -191,6 +192,9 @@ namespace Idxhook {
 
 		static auto ChangeRenderState = [](bool value, bool shouldRender, System::Array<UnityEngine::Renderer>* renderers)
 		{
+			if (!renderers)
+				return;
+
 			if (value || shouldRender)
 			{
 				if (!value && shouldRender)
@@ -214,51 +218,36 @@ namespace Idxhook {
 		auto evidenceController = *(Engine::EvidenceController**)Offsets::TypeInfo::EvidenceController->static_fields;
 		auto gameController = *(Engine::GameController**)Offsets::TypeInfo::GameController->static_fields;
 
-#if 0
-		Engine::GameController* CurrentGameController = Utils::GetTypeFromTypeInfo<Engine::GameController>(Offsets::TypeInfo::GameController);
-		Engine::EvidenceController* CurrentEvidenceController = Utils::GetTypeFromTypeInfo<Engine::EvidenceController>(Offsets::TypeInfo::EvidenceController);
-		Engine::MissionManager* CurrentMissionManager = Utils::GetTypeFromTypeInfo<Engine::MissionManager>(Offsets::TypeInfo::MissionManager);
-		Engine::GhostController* CurrentGhostController = Utils::GetTypeFromTypeInfo<Engine::GhostController>(Offsets::TypeInfo::GhostController);
-
 		{
-			System::List<Game::Mission>* MissionList = CurrentMissionManager->CurrentMissions;
+			System::List<Engine::Mission>* missions = (*(Engine::MissionManager**)Offsets::TypeInfo::MissionManager->static_fields)->CurrentMissions;
 
-			for (int MissionIndex = 0; MissionIndex < MissionList->Size; MissionIndex++)
+			auto& completeAllMissions = CompleteAllMissions();
+
+			for (size_t i = 0; i < missions->Size; i++)
 			{
-				Game::Mission* Mission = MissionList->Items->Values[MissionIndex];
-#if 0
-				if (MissionIndex > 0 && Menu::State::CompleteAllMissions)
+				Engine::Mission* mission = missions->Items->Values[i];
+
+				auto& param = Missions()[i];
+				if (completeAllMissions || param.ShouldComplete)
 				{
-					Mission->IsCompleted = true;
-					Mission->Completed();
+					mission->IsCompleted = true;
+					mission->Completed();
 				}
-#endif
-				struct Mission MissionObject;
 
-				MissionObject.Label = System::Utilities::GetStringNative(Mission->Label->GetText());
-				MissionObject.IsCompleted = Mission->IsCompleted;
+				const char* isCompleted = mission->IsCompleted ? " (Completed)" : " (Not Completed)";
 
-				GameState::MissionData[MissionIndex] = MissionObject;
+				// Move the allocation to our new string instead of copying twice for no reason
+				param.Name = std::move(System::Utils::GetStringNative(mission->Label->GetText())) + isCompleted;
+				param.IsCompleted = mission->IsCompleted;
 			}
 
-			// Menu::State::CompleteAllMissions = false;
-
-			GameState::MissionCount = MissionList->Size;
+			completeAllMissions = false;
+			MissionSize() = missions->Size;
 		}
-
-		{
-			Game::Player* LocalPlayer = CurrentGameController->LocalPlayer->RealPlayer;
-			std::string LocalPlayerName = System::Utilities::GetStringNative(CurrentGameController->LocalPlayer->PlayerName);
-
-			//RichPresence::SetUser(LocalPlayerName.c_str());
-
-			GameState::LocalPlayerData::Sanity = std::to_string(100.f - LocalPlayer->Sanity->Insanity);
-			GameState::LocalPlayerData::Hunted = LocalPlayer->IsHunted ? "Yes" : "No";
-			GameState::LocalPlayerData::Room = System::Utilities::GetStringNative(CurrentLevelController->CurrentPlayerRoom->RoomName);
 
 #if 0
 			LocalPlayer->GrabProp->GrabDistance = (float)Menu::State::GrabDistance;
-#endif
+
 
 			System::List<Game::PhotonObjectInteract>* GrabObjectList = LocalPlayer->GrabProp->GrabObjectList;
 
@@ -268,85 +257,17 @@ namespace Idxhook {
 				if (Object) {
 					UnityEngine::Rigidbody* Rigidbody = Object->Rigidbody;
 
-#if 0
+
 					if (Rigidbody)
 						Rigidbody->SetMass((float)(51 - Menu::State::ThrowDistance) / 50.f);
-#endif
-				}
-			}
 
-#if 0
-			if (Menu::State::InfiniteStamina)
-			{
-				LocalPlayer->Stamina->fl3 = 0.f;
-				LocalPlayer->Stamina->fl4 = 3.f;
-				LocalPlayer->Stamina->fl5 = 0.448327f;
+				}
 			}
 
 			HandleButton(Menu::State::GhostSpawnDeadBody,
 				{
 				LocalPlayer->Photon->RPC(Marshal::PtrToStringAnsi((void*)"SpawnDeadBodyNetworked"), 0, nullptr);
 				})
-#endif
-		}
-
-		{
-			System::List<Game::PlayerData>* PlayerList = CurrentGameController->PlayerList;
-
-			for (int PlayerIndex = 0; PlayerIndex < PlayerList->Size; PlayerIndex++) {
-				Game::PlayerData* PlayerInstance = PlayerList->Items->Values[PlayerIndex];
-
-				UnityEngine::Vector3 PlayerPosition = PlayerInstance->RealPlayer->GetTransform()->GetPosition();
-
-				Object PlayerObject;
-
-				PlayerObject.WorldToScreen = WorldToScreen(MainCamera, PlayerPosition, PlayerObject.Position, ScreenSizeVector);
-				PlayerObject.Distance = (int)UnityEngine::Vector3::Distance(MainCameraPosition, PlayerPosition);
-				PlayerObject.Name = System::Utilities::GetStringNative(PlayerInstance->PlayerName);
-				PlayerObject.BonesWorldToScreen = true;
-
-				std::array<std::pair<UnityEngine::Vector2, UnityEngine::Vector2>, 16> BonesBuffer{};
-
-				for (std::pair<UnityEngine::HumanBodyBones, UnityEngine::HumanBodyBones> BonePair : Bones)
-				{
-					UnityEngine::Vector2 First{ };
-					UnityEngine::Vector2 Second{ };
-
-					PlayerObject.BonesWorldToScreen &= WorldToScreen(MainCamera, PlayerInstance->RealPlayer->Animator->GetBoneTransform(BonePair.first)->GetPosition(), First, ScreenSizeVector);
-					PlayerObject.BonesWorldToScreen &= WorldToScreen(MainCamera, PlayerInstance->RealPlayer->Animator->GetBoneTransform(BonePair.second)->GetPosition(), Second, ScreenSizeVector);
-
-					size_t index = &BonePair - &Bones[0];
-					BonesBuffer.at(index) = std::make_pair(First, Second);
-				}
-
-				PlayerObject.Bones = BonesBuffer;
-
-				GameState::PlayerData[PlayerIndex] = PlayerObject;
-			}
-
-			GameState::PlayerCount = PlayerList->Size;
-		}
-
-		{
-			static std::string EvidenceTypes[] = { "EMF Spot", "Ouija Board", "Fingerprint", "Footstep", "Bone", "Ghost", "Dead Body", "Dirty Water" };
-
-			System::List<Game::Evidence>* EvidenceList = CurrentEvidenceController->EvidenceList;
-
-			for (int EvidenceIndex = 0; EvidenceIndex < EvidenceList->Size; EvidenceIndex++) {
-				Game::Evidence* Evidence = EvidenceList->Items->Values[EvidenceIndex];
-
-				UnityEngine::Vector3 EvidencePosition = Evidence->GetTransform()->GetPosition();
-
-				Object EvidenceObject;
-
-				EvidenceObject.WorldToScreen = WorldToScreen(MainCamera, EvidencePosition, EvidenceObject.Position, ScreenSizeVector);
-				EvidenceObject.Distance = (int)UnityEngine::Vector3::Distance(MainCameraPosition, EvidencePosition);
-				EvidenceObject.Name = EvidenceTypes[Evidence->Type];
-
-				GameState::EvidenceData[EvidenceIndex] = EvidenceObject;
-			}
-
-			GameState::EvidenceCount = EvidenceList->Size;
 		}
 
 		{
@@ -404,14 +325,15 @@ namespace Idxhook {
 		if (GhostEnable())
 		{
 			Engine::GhostAI* ghost = levelController->CurrentGhost;
-#if 0
-			static std::string GhostNames[] =
+			Engine::GhostInfo* ghostInfo = ghost->Info;
+
+			static const char* GhostNames[] =
 			{
 				"None", "Spirit", "Wraith", "Phantom", "Poltergeist", "Banshee", "Jinn", "Mare",
 				"Revenant", "Shade", "Demon", "Yurei", "Oni", "Yokai", "Hantu", "Goryo", "Myling"
 			};
 
-			static std::string GhostEvidences[] =
+			static const char* GhostEvidences[] =
 			{
 				"None", "EMF Level 5, Spirit box, Ghost writing", "EMF Level 5, Spirit box, D.O.T.S Projector",
 				"Spirit box, Fingerprints, D.O.T.S Projector", "Spirit box, Fingerprints, Ghost writing",
@@ -423,25 +345,20 @@ namespace Idxhook {
 				"EMF Level 5, Fingerprints, D.O.T.S Projector", "EMF Level 5, Fingerprints, Ghost writing"
 			};
 
-			
-			Engine::GhostInfo* ghostInfo = ghost->Info;
+			const char* isShy = ghostInfo->IsShy ? " (Shy)" : " (Not Shy)";
 
-			GameState::GhostData::Name = System::Utilities::GetStringNative(ghostInfo->Name) + (ghostInfo->IsShy ? " (Shy)" : "");
-			GameState::GhostData::Age = std::to_string(ghostInfo->Age);
-			GameState::GhostData::Type = GhostNames[ghostInfo->Type];
-			GameState::GhostData::Evidence = GhostEvidences[ghostInfo->Type];
-			GameState::GhostData::Gender = ghostInfo->IsMale ? "Male" : "Female";
-			GameState::GhostData::Room = System::Utilities::GetStringNative(CurrentLevelController->CurrentGhostRoom->RoomName);
-			GameState::GhostData::Hunting = ghost->IsHunting ? "Yes" : "No";
+			GhostInfoParams& info = Cheat::GhostInfo();
 
-			UnityEngine::Vector3 GhostPosition = ghost->GetTransform()->GetPosition();
+			// Move the allocation to our new string instead of copying twice for no reason
+			info.Name = std::move(System::Utils::GetStringNative(ghostInfo->Name)) + isShy;
+			info.Room = std::move(System::Utils::GetStringNative(levelController->CurrentGhostRoom->RoomName));
+			info.Age = std::to_string(ghostInfo->Age);
+			info.Type = GhostNames[ghostInfo->Type];
+			info.Evidence = GhostEvidences[ghostInfo->Type];
+			info.Gender = ghostInfo->IsMale ? "Male" : "Female";
+			info.Hunting = ghost->IsHunting ? "Yes" : "No";
 
-			GameState::GhostData::Distance = (int)UnityEngine::Vector3::Distance(MainCameraPosition, GhostPosition);
-			GameState::GhostData::WorldToScreen = WorldToScreen(MainCamera, GhostPosition, GameState::GhostData::Position, ScreenSizeVector);
-			GameState::GhostData::BonesWorldToScreen = true;
-#endif
-			if (ghost->RendererArray)
-				ChangeRenderState(GhostRenderModel(), GhostShouldRenderModel(), ghost->RendererArray);
+			ChangeRenderState(GhostRenderModel(), GhostShouldRenderModel(), ghost->RendererArray);
 
 			if (GhostSkeletonEnable())
 			{
@@ -568,16 +485,9 @@ namespace Idxhook {
 									})
 #endif
 		}
-#if 0
-		{
-			if (Menu::State::MaxLightsOverride) CurrentLevelController->CurrentFuseBox->MaxLights = 50;
 
-			UnityEngine::Vector3 FuseBoxPosition = CurrentLevelController->CurrentFuseBox->GetTransform()->GetPosition();
-
-			GameState::FuseBox.Distance = (int)UnityEngine::Vector3::Distance(MainCameraPosition, FuseBoxPosition);
-			GameState::FuseBox.WorldToScreen = WorldToScreen(MainCamera, FuseBoxPosition, GameState::FuseBox.Position, ScreenSizeVector);
-		}
-#endif
+		if (MaxLights())
+			levelController->CurrentFuseBox->MaxLights = 50;
 	}
 
 	void Cheat::Hooks::Player::Update(Engine::Player* Player, void* Info)
@@ -618,16 +528,6 @@ namespace Idxhook {
 
 			if (MaxSanity())
 				localPlayer->Sanity->Insanity = 0.0f;
-#if 0
-			if (Menu::State::Noclip)
-			{
-				Cheats::RunNoclip(localPlayer);
-			}
-			else
-			{
-				Cheats::ResetNoclip(localPlayer);
-			}
-#endif
 		}
 	}
 

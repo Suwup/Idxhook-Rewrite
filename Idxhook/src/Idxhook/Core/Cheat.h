@@ -1,20 +1,59 @@
 #pragma once
 
 #include "Idxhook/Core/Base.h"
-
 #include "Idxhook/Engine/Engine.h"
 
-#include <unordered_map>
 #include <array>
 #include <imgui.h>
 #undef DrawText
 
 namespace Idxhook {
 
+	struct GhostInfoParams
+	{
+		std::string Name = std::string();
+		std::string Age = std::string();
+		std::string Room = std::string();
+		std::string Type = std::string();
+		std::string Evidence = std::string();
+		std::string Gender = std::string();
+		std::string Hunting = std::string();
+	};
+
+	struct MissionParams
+	{
+		std::string Name = std::string();
+		bool IsCompleted = false;
+		bool ShouldComplete = false;
+	};
+
+	struct BaseParams
+	{
+		bool Valid = false;
+	};
+
+	struct BoneParams : public BaseParams
+	{
+		UnityEngine::Vector2 A{};
+		UnityEngine::Vector2 B{};
+	};
+
+	struct ItemParams : public BaseParams
+	{
+		UnityEngine::Vector2 Location{};
+		const char* Name = nullptr;
+	};
+
+	struct BoxParams : public BaseParams
+	{
+		UnityEngine::Vector2 Location[2][4]{};
+	};
+
 	class Cheat
 	{
 	public:
 		using BoneID = UnityEngine::HumanBodyBones;
+		using NameParams = ItemParams;
 	public:
 		Cheat();
 		virtual ~Cheat();
@@ -23,30 +62,6 @@ namespace Idxhook {
 		void Close();
 
 		static inline Cheat& Get() { return *s_Instance; }
-	private:
-		struct BaseParams
-		{
-			bool Valid = false;
-		};
-
-		struct BoneParams : public BaseParams
-		{
-			UnityEngine::Vector2 A{};
-			UnityEngine::Vector2 B{};
-		};
-
-		struct ItemParams : public BaseParams
-		{
-			UnityEngine::Vector2 Location{};
-			const char* Name = nullptr;
-		};
-
-		struct BoxParams : public BaseParams
-		{
-			UnityEngine::Vector2 Location[2][4]{};
-		};
-
-		using NameParams = ItemParams;
 	private:
 		static constexpr int32_t s_MaxArraySize = 32;
 		static constexpr int32_t s_BoneCount = 18;
@@ -70,6 +85,8 @@ namespace Idxhook {
 		static bool& GhostShouldRenderModel() { return Get().IGhostShouldRenderModel(); }
 		static bool& MaxStamina() { return Get().IMaxStamina(); }
 		static bool& MaxSanity() { return Get().IMaxSanity(); }
+		static bool& MaxLights() { return Get().IMaxLights(); }
+		static bool& CompleteAllMissions() { return Get().ICompleteAllMissions(); }
 		static UnityEngine::Vector2& ScreenSize() { return Get().IScreenSize(); }
 		static BoxParams& GhostBox() { return Get().IGhostBox(); }
 		static std::array<BoneParams, s_BoneCount>& GhostBones() { return Get().IGhostBones(); }
@@ -77,8 +94,38 @@ namespace Idxhook {
 		static std::array<NameParams, s_MaxArraySize>& PlayerNames() { return Get().IPlayerNames(); }
 		static std::array<ItemParams, s_MaxArraySize>& Items() { return Get().IItems(); }
 		static std::array<std::pair<BoneID, BoneID>, s_BoneCount>& BoneIDArray() { return Get().IBoneIDArray(); }
-		static std::unordered_map<std::string, uintptr_t>& FunctionMap() { return Get().IFunctionMap(); }
-		static std::unordered_map<std::string, uintptr_t>& TypeInfoMap() { return Get().ITypeInfoMap(); }
+		static GhostInfoParams& GhostInfo() { return Get().IGhostInfo(); }
+		static std::array<MissionParams, s_MaxArraySize>& Missions() { return Get().IMissions(); }
+		static size_t& MissionSize() { return Get().IMissionSize(); }
+	private:
+		bool& IxQcSpeed() { return m_xQcSpeed; }
+		float& IxQcSpeedMultiplier() { return m_xQcSpeedMultiplier; }
+		bool& ICredits() { return m_Credits; }
+		bool& IBlockFuseBox() { return m_BlockFuseBox; }
+		float& IFieldOfView() { return m_FieldOfView; }
+		bool& IItemEnable() { return m_ItemEnable; }
+		bool& IPlayersEnable() { return m_PlayersEnable; }
+		bool& IPlayersSkeletonEnable() { return m_PlayersSkeletonEnable; }
+		bool& IPlayersNameEnable() { return m_PlayersNameEnable; }
+		bool& IGhostEnable() { return m_GhostEnable; }
+		bool& IGhostBoxEnable() { return m_GhostBoxEnable; }
+		bool& IGhostSkeletonEnable() { return m_GhostSkeletonEnable; }
+		bool& IGhostRenderModel() { return m_GhostRenderModel; }
+		bool& IGhostShouldRenderModel() { return m_GhostShouldRenderModel; }
+		bool& IMaxStamina() { return m_MaxStamina; }
+		bool& IMaxSanity() { return m_MaxSanity; }
+		bool& IMaxLights() { return m_MaxLights; }
+		bool& ICompleteAllMissions() { return m_CompleteAllMissions; }
+		UnityEngine::Vector2& IScreenSize() { return m_ScreenSize; }
+		BoxParams& IGhostBox() { return m_GhostBox; }
+		std::array<BoneParams, s_BoneCount>& IGhostBones() { return m_GhostBones; }
+		std::array<std::array<BoneParams, s_BoneCount>, s_MaxArraySize>& IPlayerBones() { return m_PlayerBones; }
+		std::array<NameParams, s_MaxArraySize>& IPlayerNames() { return m_PlayerNames; }
+		std::array<ItemParams, s_MaxArraySize>& IItems() { return m_Items; }
+		std::array<std::pair<BoneID, BoneID>, s_BoneCount>& IBoneIDArray() { return m_BoneIDArray; }
+		GhostInfoParams& IGhostInfo() { return m_GhostInfo; }
+		std::array<MissionParams, s_MaxArraySize>& IMissions() { return m_Missions; }
+		size_t& IMissionSize() { return m_MissionSize; }
 	private:
 		struct Hooks
 		{
@@ -99,7 +146,7 @@ namespace Idxhook {
 			struct GUIUtility { static inline void CheckOnGUI(void* Info); };
 			struct Player { static inline void Update(Engine::Player* Player, void* Info); };
 		};
-		
+
 		struct Original
 		{
 			struct GhostAI { static inline std::add_pointer_t<void(void*, void*)> Start = nullptr; };
@@ -120,32 +167,6 @@ namespace Idxhook {
 			struct Player { static inline std::add_pointer_t<void(Engine::Player*, void*)> Update = nullptr; };
 		};
 	private:
-		bool& IxQcSpeed() { return m_xQcSpeed; }
-		float& IxQcSpeedMultiplier() { return m_xQcSpeedMultiplier; }
-		bool& ICredits() { return m_Credits; }
-		bool& IBlockFuseBox() { return m_BlockFuseBox; }
-		float& IFieldOfView() { return m_FieldOfView; }
-		bool& IItemEnable() { return m_ItemEnable; }
-		bool& IPlayersEnable() { return m_PlayersEnable; }
-		bool& IPlayersSkeletonEnable() { return m_PlayersSkeletonEnable; }
-		bool& IPlayersNameEnable() { return m_PlayersNameEnable; }
-		bool& IGhostEnable() { return m_GhostEnable; }
-		bool& IGhostBoxEnable() { return m_GhostBoxEnable; }
-		bool& IGhostSkeletonEnable() { return m_GhostSkeletonEnable; }
-		bool& IGhostRenderModel() { return m_GhostRenderModel; }
-		bool& IGhostShouldRenderModel() { return m_GhostShouldRenderModel; }
-		bool& IMaxStamina() { return m_MaxStamina; }
-		bool& IMaxSanity() { return m_MaxSanity; }
-		UnityEngine::Vector2& IScreenSize() { return m_ScreenSize; }
-		BoxParams& IGhostBox() { return m_GhostBox; }
-		std::array<BoneParams, s_BoneCount>& IGhostBones() { return m_GhostBones; }
-		std::array<std::array<BoneParams, s_BoneCount>, s_MaxArraySize>& IPlayerBones() { return m_PlayerBones; }
-		std::array<NameParams, s_MaxArraySize>& IPlayerNames() { return m_PlayerNames; }
-		std::array<ItemParams, s_MaxArraySize>& IItems() { return m_Items; }
-		std::array<std::pair<BoneID, BoneID>, s_BoneCount>& IBoneIDArray() { return m_BoneIDArray; }
-		std::unordered_map<std::string, uintptr_t>& IFunctionMap() { return m_FunctionMap; }
-		std::unordered_map<std::string, uintptr_t>& ITypeInfoMap() { return m_TypeInfoMap; }
-	private:
 		bool m_xQcSpeed = false;
 		float m_xQcSpeedMultiplier = 1.0f;
 		bool m_Credits = true;
@@ -162,6 +183,9 @@ namespace Idxhook {
 		bool m_GhostShouldRenderModel = true;
 		bool m_MaxStamina = true;
 		bool m_MaxSanity = true;
+		bool m_MaxLights = false;
+		bool m_CompleteAllMissions = false;
+		size_t m_MissionSize = 0;
 
 		UnityEngine::Vector2 m_ScreenSize{};
 
@@ -191,9 +215,8 @@ namespace Idxhook {
 			{ BoneID::LeftLowerArm, BoneID::LeftHand },
 			{ BoneID::RightLowerArm, BoneID::RightHand }
 		} };
-
-		std::unordered_map<std::string, uintptr_t> m_FunctionMap{};
-		std::unordered_map<std::string, uintptr_t> m_TypeInfoMap{};
+		GhostInfoParams m_GhostInfo = {};
+		std::array<MissionParams, s_MaxArraySize> m_Missions = {};
 	private:
 		static Cheat* s_Instance;
 	};
