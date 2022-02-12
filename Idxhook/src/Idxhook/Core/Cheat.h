@@ -127,6 +127,8 @@ namespace Idxhook {
 		std::array<MissionParams, s_MaxArraySize>& IMissions() { return m_Missions; }
 		size_t& IMissionSize() { return m_MissionSize; }
 	private:
+		static void ChangeRenderState(bool value, bool shouldRender, System::Array<UnityEngine::Renderer>* renderers);
+	private:
 		struct Hooks
 		{
 			struct GhostAI { static inline void Start(void* This, void* Info); };

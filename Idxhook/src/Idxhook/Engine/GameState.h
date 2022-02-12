@@ -7,6 +7,8 @@ namespace Idxhook {
 
 	namespace GameState {
 
+		// TODO: Move to Cheat class
+
 		namespace Pointers {
 
 			inline void* GhostAI = nullptr;

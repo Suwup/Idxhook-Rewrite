@@ -1,6 +1,11 @@
 #include "ihpch.h"
 #include "Il2cpp.h"
 
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <filesystem>
+
 namespace Idxhook {
 
 #define SET_METHOD(ret, name, args) name = reinterpret_cast<decltype(name)>(GetProcAddress(m_Data, #name));
@@ -40,6 +45,11 @@ namespace Idxhook {
 		if (!assembly) return nullptr;
 
 		return il2cpp_class_from_name(assembly->image, nms, clazz);
+	}
+
+	Il2CppClass* Il2cpp::IGetClass(const Il2CppType* type)
+	{
+		return il2cpp_class_from_il2cpp_type(type);
 	}
 
 	Il2CppMethodPointer Il2cpp::IGetMethod(const char* assm, const char* nms, const char* clazz, const char* funcName, int argc)

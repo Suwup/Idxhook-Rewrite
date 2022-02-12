@@ -36,14 +36,4 @@ namespace Idxhook::System {
         };
     };
 
-    namespace Utils {
-
-        auto GetStringNative = [](System::String* str) -> std::string
-		{
-            std::u16string u16(reinterpret_cast<const char16_t*>(str->Chars));
-            return std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.to_bytes(u16);
-        };
-
-    }
-
 }

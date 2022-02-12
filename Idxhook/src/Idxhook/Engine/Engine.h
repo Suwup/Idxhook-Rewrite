@@ -1,59 +1,59 @@
-#pragma once
+﻿#pragma once
 #include "UnityEngine.h"
 
 namespace Idxhook::Engine {
 
 	struct Evidence : public UnityEngine::Component
 	{
-        union
+		union
 		{
-            Member(int, Type, 0x34);
-        };
-    };
+			Member(int, Type, 0x34);
+		};
+	};
 
 	struct EvidenceController
 	{
-        union
+		union
 		{
-            Member(System::List<Evidence>*, EvidenceList, 0x28);
-        };
-    };
+			Member(System::List<Evidence>*, EvidenceList, 0x20);
+		};
+	};
 
 	struct PhotonObjectInteract
 	{
-        union
+		union
 		{
-            Member(UnityEngine::Rigidbody*, Rigidbody, 0x160);
-        };
-    };
+			Member(UnityEngine::Rigidbody*, Rigidbody, 0x168);
+		};
+	};
 
 	struct PCPropGrab
 	{
-        union
+		union
 		{
-            Member(float, GrabDistance, 0x18);
-            Member(System::List<PhotonObjectInteract>*, GrabObjectList, 0x60);
-        };
-    };
+			Member(float, GrabDistance, 0x18);
+			Member(System::List<PhotonObjectInteract>*, GrabObjectList, 0x60);
+		};
+	};
 
 	struct FirstPersonController
 	{
-        union
+		union
 		{
-            Member(float, JumpSpeed, 0x20);
-            Member(float, StickToGroundForce, 0x24);
-            Member(float, GravityMultiplier, 0x28);
-            Member(bool, Jump, 0x70);
-        };
-    };
+			Member(float, JumpSpeed, 0x20); // Lanylow where it at doe https://imgur.com/JEb1ZdD
+			Member(float, StickToGroundForce, 0x20);
+			Member(float, GravityMultiplier, 0x24);
+			Member(bool, Jump, 0x70);
+		};
+	};
 
 	struct PlayerSanity
 	{
-        union
+		union
 		{
-            Member(float, Insanity, 0x28);
-        };
-    };
+			Member(float, Insanity, 0x28);
+		};
+	};
 
 	namespace Photon::Pun {
 
@@ -72,8 +72,8 @@ namespace Idxhook::Engine {
 
 	struct PhotonView
 	{
-        void RPC(System::String* MethodName, Photon::Pun::RpcTarget Target, void* Arguments) { CALL_METHOD(void, (void*, System::String*, Photon::Pun::RpcTarget, void*), (this, MethodName, Target, Arguments), ("PhotonUnityNetworking", "Photon.Pun", "PhotonView", "RPC", 3)); }
-    };
+		void RPC(System::String* MethodName, Photon::Pun::RpcTarget Target, void* Arguments) { CALL_METHOD(void, (void*, System::String*, Photon::Pun::RpcTarget, void*), (this, MethodName, Target, Arguments), ("PhotonUnityNetworking", "Photon.Pun", "PhotonView", "RPC", 3)); }
+	};
 
 	struct PlayerStamina
 	{
@@ -83,22 +83,24 @@ namespace Idxhook::Engine {
 			Member(float, float4, 0x4C);
 			Member(float, float5, 0x50);
 		};
-    };
+	};
 
 	struct Player : public UnityEngine::Component
 	{
-        union
+		union
 		{
-            Member(PhotonView*, Photon, 0x18);
-            Member(bool, IsDead, 0x20);
-            Member(PlayerSanity*, Sanity, 0xB0);
-            Member(PlayerStamina*, Stamina, 0xE0);
-            Member(UnityEngine::CharacterController*, CharController, 0xE8);
-            Member(FirstPersonController*, FirstPersonController, 0xF8);
-            Member(PCPropGrab*, GrabProp, 0x100);
-            Member(UnityEngine::Animator*, Animator, 0x140);
-        };
-    };
+			Member(PhotonView*, Photon, 0x18);
+			Member(bool, IsDead, 0x20);
+			Member(PlayerSanity*, Sanity, 0xB8);
+			Member(PlayerStamina*, Stamina, 0xE8);
+			Member(UnityEngine::CharacterController*, CharController, 0xF0);
+			Member(FirstPersonController*, FirstPersonController, 0x100);
+			Member(PCPropGrab*, GrabProp, 0x108);
+			Member(UnityEngine::Animator*, Animator, 0x148);
+		};
+
+		void KillPlayer() { CALL_METHOD(void, (void*), (this), ("Assembly-CSharp", "", "Player", "KillPlayer", 0)); }
+	};
 
 	namespace Photon::Realtime {
 
@@ -115,50 +117,57 @@ namespace Idxhook::Engine {
 
     struct PlayerData
 	{
-        union
+		union
 		{
-            Member(Player*, RealPlayer, 0x10);
-            Member(Photon::Realtime::Player*, PhotonPlayer, 0x18);
-            Member(System::String*, PlayerName, 0x20);
-        };
-    };
+			Member(Player*, RealPlayer, 0x10);
+			Member(Photon::Realtime::Player*, PhotonPlayer, 0x18);
+			Member(System::String*, PlayerName, 0x20);
+		};
+	};
 
 	struct GameController
 	{
-        union
+		union
 		{
-            Member(PlayerData*, MyPlayer, 0x18);
-            Member(System::List<PlayerData>*, PlayerList, 0x58);
-        };
-    };
+			Member(PlayerData*, MyPlayer, 0x18);
+			Member(System::List<PlayerData>*, PlayerList, 0x68);
+		};
+	};
 
 	struct GhostEventPlayer
 	{
-        union
+		union
 		{
-            Member(PhotonView*, Photon, 0x18);
-        };
-    };
+			Member(PhotonView*, Photon, 0x18);
+		};
+	};
 
 	struct GhostController
 	{
-        union
+		union
 		{
-            Member(GhostEventPlayer*, EventPlayer, 0x58);
-        };
-    };
+			Member(GhostEventPlayer*, EventPlayer, 0x60);
+		};
+	};
 
 	struct GhostInfo
 	{
-        union
+		union
 		{
-            Member(int, Type, 0x20);
-            Member(int, Age, 0x24);
-            Member(bool, IsMale, 0x28);
-            Member(System::String*, Name, 0x30);
-            Member(bool, IsShy, 0x40);
-        };
-    };
+			char UnknownData[0x20];
+
+			Member(int, GhostEvidence, 0x8);
+		};
+
+		union
+		{
+			Member(int, Type, 0x4); // Seems to be the same as 0x0 ???????
+			Member(int, Age, 0x10);
+			Member(bool, IsMale, 0x14);
+			Member(System::String*, Name, 0x18);
+			Member(bool, IsShy, 0x28);
+		};
+	};
 
 	struct GhostAI : public UnityEngine::Component
 	{
@@ -176,97 +185,94 @@ namespace Idxhook::Engine {
 			doorKnock = 9,
 			windowKnock = 10,
 			carAlarm = 11,
-			radio = 12,
-			flicker = 13,
-			lockDoor = 14,
-			cctv = 15,
-			randomEvent = 16,
-			GhostAbility = 17,
-			killPlayer = 18,
-			sink = 19,
-			sound = 20,
-			painting = 21,
-			mannequin = 22,
-			teleportObject = 23,
-			animationObject = 24
+			flicker = 12,
+			cctv = 13,
+			randomEvent = 14,
+			GhostAbility = 15,
+			mannequin = 16,
+			teleportObject = 17,
+			interact = 18,
+			summoningCircle = 19,
+			musicBox = 20
 		};
 
-        union
+		union
 		{
-            Member(UnityEngine::Animator*, Animator, 0x30);
-            Member(GhostInfo*, Info, 0x38);
+			Member(States, State, 0x20);
+			Member(UnityEngine::Animator*, Animator, 0x30);
+			Member(GhostInfo*, Info, 0x38);
 			Member(System::Array<UnityEngine::Renderer>*, RendererArray, 0x68);
-            Member(bool, IsHunting, 0xA8);
+			Member(bool, IsHunting, 0x9D);
 			Member(Player*, PlayerToKill, 0xC0);
-        };
+		};
 
-        void Appear() { CALL_METHOD(void, (void*, bool), (this, true), ("Assembly-CSharp", "", "GhostAI", "Appear", 1)); }
-        void RandomEvent() { CALL_METHOD(void, (void*), (this), ("Assembly-CSharp", "", "GhostAI", "RandomEvent", 0)); }
-        void ChangeState(States state, PhotonObjectInteract* object, System::Array<PhotonObjectInteract>* objectArray) { CALL_METHOD(void, (void*, States, PhotonObjectInteract*, System::Array<PhotonObjectInteract>*), (this, state, object, objectArray), ("Assembly-CSharp", "", "GhostAI", "ChangeState", 3)); }
-    };
+		void Appear() { CALL_METHOD(void, (void*, bool), (this, true), ("Assembly-CSharp", "", "GhostAI", "Appear", 1)); }
+		void RandomEvent() { CALL_METHOD(void, (void*), (this), ("Assembly-CSharp", "", "GhostAI", "RandomEvent", 0)); }
+		void ChangeState(States state, PhotonObjectInteract* object, System::Array<PhotonObjectInteract>* objectArray, bool something = false) { CALL_METHOD(void, (void*, States, PhotonObjectInteract*, System::Array<PhotonObjectInteract>*, bool), (this, state, object, objectArray, something), ("Assembly-CSharp", "", "GhostAI", "ChangeState", 4)); }
+	};
 
 	struct FuseBox : public UnityEngine::Component
 	{
-        union
+		union
 		{
-            Member(int, MaxLights, 0x84);
-        };
-    };
+			Member(int, MaxLights, 0x84);
+		};
+	};
 
 	struct LevelRoom
 	{
-        union
+		union
 		{
-            Member(System::String*, RoomName, 0x50);
-        };
-    };
+			Member(System::String*, RoomName, 0x58);
+		};
+	};
 
 	struct SoundController
 	{
-        union
+		union
 		{
-            Member(PhotonView*, Photon, 0x18);
-        };
-    };
+			Member(PhotonView*, Photon, 0x18);
+		};
+	};
 
 	struct Door
 	{
-        union
+		union
 		{
-            Member(PhotonView*, Photon, 0x60);
-        };
-    };
+			Member(PhotonView*, Photon, 0x68);
+		};
+	};
 
 	struct LevelController
 	{
-        union
+		union
 		{
-            Member(LevelRoom*, CurrentPlayerRoom, 0x20);
-            Member(LevelRoom*, CurrentGhostRoom, 0x28);
-            Member(GhostAI*, CurrentGhost, 0x30);
-            Member(System::Array<Door>*, DoorArray, 0x38);
-            Member(FuseBox*, CurrentFuseBox, 0x60);
-            Member(SoundController*, SoundController, 0x80);
-        };
-    };
+			Member(LevelRoom*, CurrentPlayerRoom, 0x20);
+			Member(LevelRoom*, CurrentGhostRoom, 0x28);
+			Member(GhostAI*, CurrentGhost, 0x30);
+			Member(System::Array<Door>*, DoorArray, 0x38);
+			Member(FuseBox*, CurrentFuseBox, 0x68);
+			Member(SoundController*, SoundController, 0x80);
+		};
+	};
 
 	struct Mission
 	{
-        union
+		union
 		{
-            Member(bool, IsCompleted, 0x24);
-            Member(UnityEngine::Text*, Label, 0x30);
-        };
+			Member(bool, IsCompleted, 0x24);
+			Member(UnityEngine::Text*, Label, 0x30);
+		};
 
-        void Completed() { CALL_METHOD(void, (void*), (this), ("Assembly-CSharp", "", "Mission", "Completed", 0)); }
-    };
+		void Completed() { CALL_METHOD(void, (void*), (this), ("Assembly-CSharp", "", "Mission", "Completed", 0)); }
+	};
 
 	struct MissionManager
 	{
-        union
+		union
 		{
-            Member(System::List<Mission>*, CurrentMissions, 0x50);
-        };
-    };
+			Member(System::List<Mission>*, CurrentMissions, 0x50);
+		};
+	};
 
 }

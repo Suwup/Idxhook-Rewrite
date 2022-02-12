@@ -59,7 +59,7 @@ namespace Idxhook {
 
 					const auto drawList = ImGui::GetBackgroundDrawList();
 
-					drawList->AddText(nullptr, 0.0f, { 10.0f, 10.0f }, ImGui::GetColorU32(IM_COL32_WHITE), "Idxhook [Rewrite]");
+					drawList->AddText(nullptr, 0.0f, { 10.0f, 10.0f }, ImGui::GetColorU32(IM_COL32_WHITE), "Idxhook [Unmaintained]");
 
 					if (Cheat::Credits())
 					{
@@ -194,6 +194,7 @@ namespace Idxhook {
 							ImGui::Checkbox("Render model", &Cheat::GhostRenderModel());
 
 							ImGui::ColorEdit4("Color", (float*)&color);
+							ImGui::Spacing();
 
 							ImGui::EndTabItem();
 						}
@@ -257,22 +258,25 @@ namespace Idxhook {
 									auto data = playerList->Items->Values[i];
 									auto player = data->RealPlayer;
 
-									// Move the allocation to our new string instead of copying twice for no reason
-									std::string playerName = std::move(System::Utils::GetStringNative(data->PlayerName));
+									std::string playerName = std::wstring_convert<std::codecvt_utf8_utf16<uint16_t>, uint16_t>{}.to_bytes(data->PlayerName->Chars);
 
 									ImGui::NewLine();
-									ImGui::Text(std::string(playerName + " :: " + (player->IsDead ? "Dead" : "Alive")).c_str());
+									ImGui::Text(std::string(playerName + " -> " + (player->IsDead ? "Dead" : "Alive")).c_str());
+#if KILL_PLAYER_NOT_WORKING
 									ImGui::SameLine();
 
 									if (PhotonNetwork::IsMasterClient())
 									{
 										if (ImGui::Button(std::string("Kill##" + playerName).c_str()))
 										{
-											Engine::GhostAI* ghost = reinterpret_cast<Engine::LevelController*>(GameState::Pointers::LevelController)->CurrentGhost;
+											Engine::GhostAI* ghost = ((Engine::LevelController*)GameState::Pointers::LevelController)->CurrentGhost;
 											ghost->PlayerToKill = player;
-											ghost->ChangeState(Engine::GhostAI::States::killPlayer, nullptr, nullptr);
+											ghost->ChangeState(Engine::GhostAI::States::summoningCircle, nullptr, nullptr);
+											player->GetTransform()->SetPosition(ghost->GetTransform()->GetPosition());
+											//player->KillPlayer();
 										}
 									}
+#endif
 								}
 
 								ImGui::EndTabItem();
@@ -291,8 +295,7 @@ namespace Idxhook {
 
 	void ImGuiLayer::OnInit(IDXGISwapChain* swapChain)
 	{
-		auto status = swapChain->GetDevice(__uuidof(ID3D11Device), (void**)&m_Device);
-		if (!SUCCEEDED(status))
+		if (!SUCCEEDED(swapChain->GetDevice(__uuidof(ID3D11Device), (void**)&m_Device)))
 			return;
 
 		m_Device->GetImmediateContext(&m_Context);

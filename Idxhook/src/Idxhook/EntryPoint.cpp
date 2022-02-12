@@ -14,12 +14,12 @@ static void Init()
 	cheat->Run();
 }
 
-int __stdcall DllMain(void* dllHandle, unsigned long reason, void* reserved)
+int __stdcall DllMain(HMODULE lib, uint32_t reason, void*)
 {
 	if (reason != DLL_PROCESS_ATTACH)
 		return false;
 
-	DisableThreadLibraryCalls(static_cast<HMODULE>(dllHandle));
+	DisableThreadLibraryCalls(lib);
 
 	std::thread(Init).detach();
 	return true;

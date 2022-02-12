@@ -1,4 +1,4 @@
-#include "ihpch.h"
+﻿#include "ihpch.h"
 #include "Cheat.h"
 
 #include "Idxhook/DirectX/DirectX11.h"
@@ -32,23 +32,9 @@ namespace Idxhook {
 	{
 	}
 
-	static bool AcHook(Engine::Player* player)
-	{
-
-	}
-
 	void Cheat::Run()
 	{
 		auto il2cpp = new Il2cpp();
-
-#if EXAMPLE
-		auto clazz = il2cpp->GetClass("Assembly-CSharp", "", "EvidenceController");
-		std::cout << "clazz: 0x" << std::hex << (void*)clazz << std::endl;
-		std::cout << "clazz->static_fields: 0x" << std::hex << (void*)clazz->static_fields << std::endl;
-
-		for (uint16_t i = 0; i < clazz->method_count; i++)
-			std::cout << "clazz->methods["<< i << "]->name: " << evidenceControllerClass->methods[i]->name << std::endl;
-#endif
 
 		USE_TYPE_INFO(SET_TYPE_INFO);
 		USE_HOOK(SET_HOOK);
@@ -84,6 +70,26 @@ namespace Idxhook {
 
 	void Cheat::Close()
 	{
+	}
+
+	void Cheat::ChangeRenderState(bool value, bool shouldRender, System::Array<UnityEngine::Renderer>* renderers)
+	{
+		if (renderers && (value || shouldRender))
+		{
+			if (!value && shouldRender)
+				shouldRender = false;
+			else if (value && !shouldRender)
+					shouldRender = true;
+
+			for (uint64_t i = 0; i < renderers->MaxLength; i++)
+			{
+				auto renderer = renderers->Values[i];
+				if (!renderer)
+					continue;
+
+				renderer->SetEnabled(value);
+			}
+		}
 	}
 
 	void Cheat::Hooks::DNAEvidence::Start(void* This, void* Info)
@@ -190,31 +196,7 @@ namespace Idxhook {
 			return false;
 		};
 
-		static auto ChangeRenderState = [](bool value, bool shouldRender, System::Array<UnityEngine::Renderer>* renderers)
-		{
-			if (!renderers)
-				return;
-
-			if (value || shouldRender)
-			{
-				if (!value && shouldRender)
-					shouldRender = false;
-				else
-				if (value && !shouldRender)
-					shouldRender = true;
-
-				for (uint64_t i = 0; i < renderers->MaxLength; i++)
-				{
-					auto renderer = renderers->Values[i];
-					if (!renderer)
-						continue;
-
-					renderer->SetEnabled(value);
-				}
-			}
-		};
-
-		auto levelController = reinterpret_cast<Engine::LevelController*>(GameState::Pointers::LevelController);
+		auto levelController = (Engine::LevelController*)GameState::Pointers::LevelController;
 		auto evidenceController = *(Engine::EvidenceController**)Offsets::TypeInfo::EvidenceController->static_fields;
 		auto gameController = *(Engine::GameController**)Offsets::TypeInfo::GameController->static_fields;
 
@@ -236,16 +218,99 @@ namespace Idxhook {
 
 				const char* isCompleted = mission->IsCompleted ? " (Completed)" : " (Not Completed)";
 
-				// Move the allocation to our new string instead of copying twice for no reason
-				param.Name = std::move(System::Utils::GetStringNative(mission->Label->GetText())) + isCompleted;
+				param.Name = std::wstring_convert<std::codecvt_utf8_utf16<uint16_t>, uint16_t>{}.to_bytes(mission->Label->GetText()->Chars) + isCompleted;
 				param.IsCompleted = mission->IsCompleted;
 			}
 
 			completeAllMissions = false;
 			MissionSize() = missions->Size;
 		}
-
 #if 0
+		if (config->BecomeGhost)
+		{
+			Engine::GhostAI* ghost = levelController->CurrentGhost;
+			Engine::Player* localPlayer = gameController->MyPlayer->RealPlayer;
+
+			if (!hasKilled)
+			{
+				ghost->PlayerToKill = localPlayer;
+				ghost->ChangeState(Engine::GhostAI::States::killPlayer, nullptr, nullptr);
+				hasKilled = true;
+			}
+
+			localPlayer->IsDead = false;
+			ghost->canAttack = false;
+
+			auto view = state->ghostAI->fields.view;
+			if (!game::PhotonView_get_IsMine(view, nullptr))
+				game::PhotonView_TransferOwnership(view, photonPlayer, nullptr);
+
+			// Set the animator visible so that animations show
+			auto anim = state->ghostAI->fields.anim;
+			if (!game::Animator_GetBool(anim, fb::AnsiToString("isVisible"), nullptr))
+				game::Animator_SetBool(anim, fb::AnsiToString("isVisible"), true, nullptr);
+			if (game::Animator_GetFloat(anim, fb::AnsiToString("speed"), nullptr) != localMagnitude)
+				game::Animator_SetFloat(anim, fb::AnsiToString("speed"), localMagnitude, nullptr);
+
+			auto& desiredMove = localPlayer->fields.firstPersonController->fields.desiredMove;
+			if (desiredMove.x != 0.0f || desiredMove.y != 0.0f)
+			{
+				if (game::Animator_GetBool(anim, fb::AnsiToString("isIdle"), nullptr))
+				{
+					game::Animator_SetBool(anim, fb::AnsiToString("isIdle"), false, nullptr);
+
+					if (game::Animator_GetInteger(anim, fb::AnsiToString("WalkType"), nullptr) == 0)
+						game::Animator_SetInteger(anim, fb::AnsiToString("WalkType"), 0, nullptr);
+				}
+			}
+			else
+			{
+				if (!game::Animator_GetBool(anim, fb::AnsiToString("isIdle"), nullptr))
+				{
+					game::Animator_SetInteger(anim, fb::AnsiToString("IdleNumber"), std::rand() % 2, nullptr);
+					game::Animator_SetBool(anim, fb::AnsiToString("isIdle"), true, nullptr);
+				}
+			}
+
+			if (ImGui::IsKeyPressed(idx::Key::V))
+			{
+				Transform* ghost_t = game::Component_1_get_transform((Component_1*)state->ghostAI, nullptr);
+				Vector3 ghost_p = game::Transform_get_position(ghost_t, nullptr);
+
+				for (int i = 0; i < playerList->fields._size; i++)
+				{
+					auto data = playerList->fields._items->vector[i];
+					auto player = data->fields.player;
+
+					Transform* player_t = game::Component_1_get_transform((Component_1*)player, nullptr);
+					Vector3 player_p = game::Transform_get_position(player_t, nullptr);
+
+					if (player != localPlayer
+						&& !player->fields.isDead
+						&& game::Vector3_Distance(ghost_p,
+							player_p, nullptr) < 1.0f)
+					{
+						state->ghostAI->fields.playerToKill = player;
+						game::GhostAI_ChangeState(state->ghostAI, game::GhostAI_States__Enum::killPlayer, nullptr, nullptr, nullptr);
+						break;
+					}
+	}
+			}
+
+			auto ghostTransform = game::Component_1_get_transform((Component_1*)state->ghostAI, nullptr);
+			auto ghostPos = game::Transform_get_position(ghostTransform, nullptr);
+
+			auto playerTransform = game::Component_1_get_transform((Component_1*)localPlayer, nullptr);
+			auto playerPos = game::Transform_get_position(playerTransform, nullptr);
+			auto playerRotation = game::Transform_get_rotation(playerTransform, nullptr);
+
+			game::Transform_set_rotation(ghostTransform, playerRotation, nullptr);
+			game::Transform_set_position(ghostTransform, game::Vector3_op_Subtraction(playerPos,
+				{ 0, game::Transform_get_localScale(ghostTransform, nullptr).y / 2, 0 }, nullptr), nullptr);
+
+			game::GhostAI_Appear(state->ghostAI, false, nullptr);
+		}
+
 			LocalPlayer->GrabProp->GrabDistance = (float)Menu::State::GrabDistance;
 
 
@@ -327,34 +392,25 @@ namespace Idxhook {
 			Engine::GhostAI* ghost = levelController->CurrentGhost;
 			Engine::GhostInfo* ghostInfo = ghost->Info;
 
-			static const char* GhostNames[] =
+			static const char* ghostNames[] =
 			{
-				"None", "Spirit", "Wraith", "Phantom", "Poltergeist", "Banshee", "Jinn", "Mare",
-				"Revenant", "Shade", "Demon", "Yurei", "Oni", "Yokai", "Hantu", "Goryo", "Myling"
+				"Spirit", "Wraith", "Phantom", "Poltergeist", "Banshee", "Jinn", "Mare", "Revenant", "Shade", "Demon",
+				"Yurei", "Oni", "Yokai", "Hantu", "Goryo", "Myling", "Onryo", "TheTwins", "Raiju", "Obake", "Mimic"
 			};
 
-			static const char* GhostEvidences[] =
+			static const char* ghostEvidences[] =
 			{
-				"None", "EMF Level 5, Spirit box, Ghost writing", "EMF Level 5, Spirit box, D.O.T.S Projector",
-				"Spirit box, Fingerprints, D.O.T.S Projector", "Spirit box, Fingerprints, Ghost writing",
-				"Ghost orbs, Fingerprints, D.O.T.S Projector", "EMF Level 5, Freezing temperatures, Fingerprints",
-				"Ghost orbs, Spirit box, Ghost writing", "Ghost orbs, Freezing temperatures, Ghost writing",
-				"EMF Level 5, Freezing temperatures, Ghost writing", "Freezing temperatures, Fingerprints, Ghost writing",
-				"Ghost orbs, Freezing temperatures, D.O.T.S Projector", "EMF Level 5, Freezing temperatures, D.O.T.S Projector",
-				"Ghost orbs, Spirit box, D.O.T.S Projector", "Ghost orbs, Freezing temperatures, Fingerprints",
-				"EMF Level 5, Fingerprints, D.O.T.S Projector", "EMF Level 5, Fingerprints, Ghost writing"
+				"None", "EMF", "SpiritBox", "Fingerprints", "Ghost Orb", "Ghost Writing Book", "Temperature","Dots Projector"
 			};
 
 			const char* isShy = ghostInfo->IsShy ? " (Shy)" : " (Not Shy)";
 
-			GhostInfoParams& info = Cheat::GhostInfo();
-
-			// Move the allocation to our new string instead of copying twice for no reason
-			info.Name = std::move(System::Utils::GetStringNative(ghostInfo->Name)) + isShy;
-			info.Room = std::move(System::Utils::GetStringNative(levelController->CurrentGhostRoom->RoomName));
+			GhostInfoParams& info = GhostInfo();
+			info.Name = std::wstring_convert<std::codecvt_utf8_utf16<uint16_t>, uint16_t>{}.to_bytes(ghostInfo->Name->Chars) + isShy;
+			info.Room = std::wstring_convert<std::codecvt_utf8_utf16<uint16_t>, uint16_t>{}.to_bytes(levelController->CurrentGhostRoom->RoomName->Chars);
 			info.Age = std::to_string(ghostInfo->Age);
-			info.Type = GhostNames[ghostInfo->Type];
-			info.Evidence = GhostEvidences[ghostInfo->Type];
+			info.Type = ghostNames[ghostInfo->Type];
+			info.Evidence = ghostEvidences[ghostInfo->GhostEvidence];
 			info.Gender = ghostInfo->IsMale ? "Male" : "Female";
 			info.Hunting = ghost->IsHunting ? "Yes" : "No";
 
@@ -453,37 +509,11 @@ namespace Idxhook {
 						UnityEngine::Transform* transform = player->Animator->GetBoneTransform(UnityEngine::HumanBodyBones::Head);
 						bool valid = ProjectWorldToScreen(cam, transform->GetPosition(), screen, screenSize);
 
-						// Move the allocation to our new string instead of copying twice for no reason
-						std::string name = std::move(System::Utils::GetStringNative(data->PlayerName));
+						std::string name = std::wstring_convert<std::codecvt_utf8_utf16<uint16_t>, uint16_t>{}.to_bytes(data->PlayerName->Chars);
 						PlayerNames()[i] = { valid, screen, name.c_str() };
 					}
 				}
 			}
-#if 0
-			HandleButton(Menu::State::GhostAppear, {
-				Ghost->Appear();
-				})
-
-				HandleButton(Menu::State::GhostInteract, {
-					Ghost->Activity->Interact();
-					})
-
-					HandleButton(Menu::State::GhostRandomEvent, {
-						Ghost->RandomEvent();
-						})
-
-						HandleButton(Menu::State::GhostInteractWithDoor, {
-							Ghost->Activity->InteractWithARandomDoor();
-							})
-
-							HandleButton(Menu::State::GhostEventSound, {
-								CurrentGhostController->EventPlayer->Photon->RPC(Marshal::PtrToStringAnsi((void*)"PlaySoundNetworked"), 0, nullptr);
-								})
-
-								HandleButton(Menu::State::GhostKnockDoor, {
-									CurrentLevelController->SoundController->Photon->RPC(Marshal::PtrToStringAnsi((void*)"PlayDoorKnockingSound"), 0, nullptr);
-									})
-#endif
 		}
 
 		if (MaxLights())
@@ -509,6 +539,7 @@ namespace Idxhook {
 				auto& multiplier = xQcSpeedMultiplier();
 				auto velocity = charController->GetVelocity();
 
+				// TODO: Overload operator
 				velocity.X *= multiplier;
 				velocity.Y *= multiplier;
 				velocity.Z *= multiplier;
